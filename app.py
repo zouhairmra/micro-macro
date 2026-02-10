@@ -148,7 +148,6 @@ graph_data = pd.DataFrame({
 }, index=price_range)
 
 st.line_chart(graph_data)
-
 # =================================================
 # 3️⃣ ELASTICITY OF DEMAND (ADVANCED)
 # =================================================
@@ -157,8 +156,7 @@ st.subheader(ELASTICITY)
 st.write(
     "Elasticity along different demand curves and time horizons"
     if lang == "English"
-    else
-    "المرونة عبر منحنيات طلب مختلفة وعلى المدى القصير والطويل"
+    else "المرونة عبر منحنيات طلب مختلفة وعلى المدى القصير والطويل"
 )
 
 # ---------------------------------
@@ -168,8 +166,7 @@ curve_type = st.selectbox(
     "Demand Curve Type" if lang == "English" else "نوع منحنى الطلب",
     ["Steep (Inelastic)", "Linear", "Flat (Elastic)"]
     if lang == "English"
-    else
-    ["حاد (غير مرن)", "خطي", "مسطح (مرن)"]
+    else ["حاد (غير مرن)", "خطي", "مسطح (مرن)"]
 )
 
 # Adjust slope based on curve type
@@ -187,8 +184,7 @@ time_horizon = st.radio(
     "Time Horizon" if lang == "English" else "الأفق الزمني",
     ["Short Run", "Long Run"]
     if lang == "English"
-    else
-    ["المدى القصير", "المدى الطويل"]
+    else ["المدى القصير", "المدى الطويل"]
 )
 
 # Long run is more elastic
@@ -201,8 +197,7 @@ if time_horizon in ["Long Run", "المدى الطويل"]:
 st.markdown(
     "**Business Pricing Decision**"
     if lang == "English"
-    else
-    "**قرار التسعير للشركة**"
+    else "**قرار التسعير للشركة**"
 )
 
 P1 = st.slider(
@@ -274,15 +269,13 @@ if abs(elasticity) > 1:
     st.success(
         "Demand is elastic. A price decrease increases total revenue."
         if lang == "English"
-        else
-        "الطلب مرن. تخفيض السعر يزيد الإيراد الكلي."
+        else "الطلب مرن. تخفيض السعر يزيد الإيراد الكلي."
     )
 else:
     st.info(
         "Demand is inelastic. A price increase increases total revenue."
         if lang == "English"
-        else
-        "الطلب غير مرن. رفع السعر يزيد الإيراد الكلي."
+        else "الطلب غير مرن. رفع السعر يزيد الإيراد الكلي."
     )
 
 # ---------------------------------
@@ -300,8 +293,64 @@ st.line_chart(elasticity_graph)
 st.caption(
     "Elasticity differs across demand curves and increases in the long run."
     if lang == "English"
-    else
-    "تختلف المرونة باختلاف شكل منحنى الطلب وتزداد في المدى الطويل."
+    else "تختلف المرونة باختلاف شكل منحنى الطلب وتزداد في المدى الطويل."
+)
+
+# =================================================
+# 4️⃣ CROSS-PRICE ELASTICITY
+# =================================================
+st.subheader(
+    "Cross-Price Elasticity" if lang == "English" else "المرونة العرضية"
+)
+
+Px = st.slider(
+    "Price of Related Good X" if lang == "English" else "سعر السلعة المرتبطة X",
+    min_value=int(eq_price * 0.5),
+    max_value=int(eq_price * 1.5),
+    value=int(eq_price)
+)
+
+Qx1 = Q1  # Quantity of your product at initial price
+Qx2 = max(0, a - b_el * P1 + 0.2*(Px-P1))  # Simple assumed cross-effect
+
+cross_elasticity = ((Qx2 - Qx1)/((Qx1 + Qx2)/2)) / ((Px - P1)/((Px + P1)/2))
+
+if cross_elasticity > 0:
+    cross_type = "Substitutes" if lang == "English" else "سلع بديلة"
+else:
+    cross_type = "Complements" if lang == "English" else "سلع تكميلية"
+
+st.write(
+    f"**Cross-Price Elasticity = {round(cross_elasticity,2)} → {cross_type}**"
+)
+
+# =================================================
+# 5️⃣ INCOME ELASTICITY
+# =================================================
+st.subheader(
+    "Income Elasticity" if lang == "English" else "مرونة الدخل"
+)
+
+income = st.slider(
+    "Consumer Income" if lang == "English" else "دخل المستهلك",
+    min_value=1000,
+    max_value=10000,
+    value=5000,
+    step=100
+)
+
+Q_inc1 = Q1
+Q_inc2 = max(0, Q1 + 0.0005*(income-5000))  # Simple assumed income effect
+
+income_elasticity = ((Q_inc2 - Q_inc1)/((Q_inc1 + Q_inc2)/2)) / ((income - 5000)/((income + 5000)/2))
+
+if income_elasticity > 0:
+    inc_type = "Normal Good" if lang == "English" else "سلعة عادية"
+else:
+    inc_type = "Inferior Good" if lang == "English" else "سلعة دنيا"
+
+st.write(
+    f"**Income Elasticity = {round(income_elasticity,2)} → {inc_type}**"
 )
 
 # =================================
