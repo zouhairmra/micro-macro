@@ -169,7 +169,73 @@ P1 = st.slider(
     value=int(eq_price * 0.9)
 )
 
-P2 = st.slider
+P2 = st.slider(
+    "New Price" if lang == "English" else "السعر الجديد",
+    min_value=int(eq_price * 0.6),
+    max_value=int(eq_price * 1.4),
+    value=int(eq_price * 1.1)
+)
+
+# Quantities demanded
+Q1 = max(0, a - b * P1)
+Q2 = max(0, a - b * P2)
+
+# Midpoint elasticity formula
+elasticity = (
+    ((Q2 - Q1) / ((Q1 + Q2) / 2)) /
+    ((P2 - P1) / ((P1 + P2) / 2))
+)
+
+# Total revenue
+TR1 = P1 * Q1
+TR2 = P2 * Q2
+
+# Elasticity type
+if abs(elasticity) > 1:
+    elasticity_type = "Elastic" if lang == "English" else "مرن"
+elif abs(elasticity) < 1:
+    elasticity_type = "Inelastic" if lang == "English" else "غير مرن"
+else:
+    elasticity_type = "Unit Elastic" if lang == "English" else "مرونة وحدية"
+
+# Results table
+elasticity_results = pd.DataFrame({
+    PRICE: [round(P1, 2), round(P2, 2)],
+    QD: [round(Q1, 2), round(Q2, 2)],
+    "Total Revenue" if lang == "English" else "الإيراد الكلي": [round(TR1, 2), round(TR2, 2)]
+}, index=[
+    "Initial" if lang == "English" else "ابتدائي",
+    "New" if lang == "English" else "جديد"
+])
+
+st.table(elasticity_results)
+
+st.write(
+    f"**Elasticity = {round(elasticity,2)} → {elasticity_type}**"
+)
+
+# Revenue interpretation
+if abs(elasticity) > 1:
+    st.success(
+        "When demand is elastic, price and total revenue move in opposite directions."
+        if lang == "English"
+        else
+        "عندما يكون الطلب مرناً، يتحرك السعر والإيراد الكلي في اتجاهين متعاكسين."
+    )
+else:
+    st.info(
+        "When demand is inelastic, price and total revenue move in the same direction."
+        if lang == "English"
+        else
+        "عندما يكون الطلب غير مرن، يتحرك السعر والإيراد الكلي في نفس الاتجاه."
+    )
+
+# Demand curve visualization
+elasticity_graph = pd.DataFrame({
+    "Demand": [Q1, Q2]
+}, index=[P1, P2])
+
+st.line_chart(elasticity_graph)
 
 # =================================
 # MACROECONOMICS
