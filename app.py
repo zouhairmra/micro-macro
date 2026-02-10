@@ -81,3 +81,51 @@ d = np.random.randint(1, 3)       # Supply slope
 
 # Quantities
 Qd_value = max(0, a - b * price)
+Qs_value = max(0, c + d * price)
+
+# Market status
+if Qd_value > Qs_value:
+    market_status = SHORTAGE
+elif Qs_value > Qd_value:
+    market_status = SURPLUS
+else:
+    market_status = EQUILIBRIUM
+
+# Results table
+results = pd.DataFrame({
+    PRICE_LABEL: [price],
+    QD: [Qd_value],
+    QS: [Qs_value],
+    STATUS: [market_status]
+})
+
+st.subheader(RESULTS)
+st.table(results)
+
+# Supply & Demand visualization
+chart_data = pd.DataFrame({
+    "Demand": [a, Qd_value],
+    "Supply": [c, Qs_value]
+})
+
+st.line_chart(chart_data)
+
+st.caption(
+    "This simulation helps students visualize equilibrium, shortages, and surpluses."
+    if lang == "English"
+    else
+    "تساعد هذه المحاكاة الطلبة على فهم توازن السوق وحالات العجز والفائض."
+)
+
+# =================================
+# MACROECONOMICS
+# =================================
+st.markdown("---")
+st.header(MACRO)
+st.info(COMING)
+
+# ---------------------------------
+# Close RTL container
+# ---------------------------------
+if lang == "العربية":
+    st.markdown("</div>", unsafe_allow_html=True)
