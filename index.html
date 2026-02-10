@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <title>Economics Simulations</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+  <h1 id="title">Economics Simulations</h1>
+  <button onclick="toggleLanguage()">العربية | English</button>
+</header>
+
+<section class="card">
+  <h2 id="microTitle">Microeconomics</h2>
+  <p id="microDesc">Price Competition Simulation (Bertrand)</p>
+
+  <label id="priceLabel">Choose your price:</label>
+  <input type="number" id="priceInput" value="30">
+  <button onclick="runSimulation()" id="runBtn">Run Simulation</button>
+
+  <table>
+    <tr>
+      <th id="thPrice">Price</th>
+      <th id="thQuantity">Quantity</th>
+      <th id="thProfit">Profit</th>
+    </tr>
+    <tr>
+      <td id="resPrice">–</td>
+      <td id="resQty">–</td>
+      <td id="resProfit">–</td>
+    </tr>
+  </table>
+
+  <canvas id="chart" height="120"></canvas>
+</section>
+
+<section class="card coming">
+  <h2 id="macroTitle">Macroeconomics</h2>
+  <p id="macroDesc">Policy Simulations</p>
+  <strong id="coming">Coming Soon</strong>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
