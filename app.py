@@ -150,18 +150,61 @@ graph_data = pd.DataFrame({
 st.line_chart(graph_data)
 
 # =================================================
-# 3️⃣ ELASTICITY OF DEMAND (IMPROVED)
+# 3️⃣ ELASTICITY OF DEMAND (ADVANCED)
 # =================================================
 st.subheader(ELASTICITY)
 
 st.write(
-    "Price Elasticity of Demand (Midpoint Method)"
+    "Elasticity along different demand curves and time horizons"
     if lang == "English"
     else
-    "مرونة الطلب السعرية (طريقة المنتصف)"
+    "المرونة عبر منحنيات طلب مختلفة وعلى المدى القصير والطويل"
 )
 
-# Two price points
+# ---------------------------------
+# Demand curve type
+# ---------------------------------
+curve_type = st.selectbox(
+    "Demand Curve Type" if lang == "English" else "نوع منحنى الطلب",
+    ["Steep (Inelastic)", "Linear", "Flat (Elastic)"]
+    if lang == "English"
+    else
+    ["حاد (غير مرن)", "خطي", "مسطح (مرن)"]
+)
+
+# Adjust slope based on curve type
+if curve_type in ["Steep (Inelastic)", "حاد (غير مرن)"]:
+    b_el = 4
+elif curve_type in ["Flat (Elastic)", "مسطح (مرن)"]:
+    b_el = 1
+else:
+    b_el = 2
+
+# ---------------------------------
+# Short run vs Long run
+# ---------------------------------
+time_horizon = st.radio(
+    "Time Horizon" if lang == "English" else "الأفق الزمني",
+    ["Short Run", "Long Run"]
+    if lang == "English"
+    else
+    ["المدى القصير", "المدى الطويل"]
+)
+
+# Long run is more elastic
+if time_horizon in ["Long Run", "المدى الطويل"]:
+    b_el = b_el / 2
+
+# ---------------------------------
+# Business pricing decision
+# ---------------------------------
+st.markdown(
+    "**Business Pricing Decision**"
+    if lang == "English"
+    else
+    "**قرار التسعير للشركة**"
+)
+
 P1 = st.slider(
     "Initial Price" if lang == "English" else "السعر الابتدائي",
     min_value=int(eq_price * 0.6),
@@ -176,21 +219,29 @@ P2 = st.slider(
     value=int(eq_price * 1.1)
 )
 
-# Quantities demanded
-Q1 = max(0, a - b * P1)
-Q2 = max(0, a - b * P2)
+# ---------------------------------
+# Quantities
+# ---------------------------------
+Q1 = max(0, a - b_el * P1)
+Q2 = max(0, a - b_el * P2)
 
-# Midpoint elasticity formula
+# ---------------------------------
+# Midpoint elasticity
+# ---------------------------------
 elasticity = (
     ((Q2 - Q1) / ((Q1 + Q2) / 2)) /
     ((P2 - P1) / ((P1 + P2) / 2))
 )
 
-# Total revenue
+# ---------------------------------
+# Total Revenue
+# ---------------------------------
 TR1 = P1 * Q1
 TR2 = P2 * Q2
 
-# Elasticity type
+# ---------------------------------
+# Elasticity classification
+# ---------------------------------
 if abs(elasticity) > 1:
     elasticity_type = "Elastic" if lang == "English" else "مرن"
 elif abs(elasticity) < 1:
@@ -198,7 +249,9 @@ elif abs(elasticity) < 1:
 else:
     elasticity_type = "Unit Elastic" if lang == "English" else "مرونة وحدية"
 
+# ---------------------------------
 # Results table
+# ---------------------------------
 elasticity_results = pd.DataFrame({
     PRICE: [round(P1, 2), round(P2, 2)],
     QD: [round(Q1, 2), round(Q2, 2)],
@@ -214,28 +267,42 @@ st.write(
     f"**Elasticity = {round(elasticity,2)} → {elasticity_type}**"
 )
 
-# Revenue interpretation
+# ---------------------------------
+# Managerial interpretation
+# ---------------------------------
 if abs(elasticity) > 1:
     st.success(
-        "When demand is elastic, price and total revenue move in opposite directions."
+        "Demand is elastic. A price decrease increases total revenue."
         if lang == "English"
         else
-        "عندما يكون الطلب مرناً، يتحرك السعر والإيراد الكلي في اتجاهين متعاكسين."
+        "الطلب مرن. تخفيض السعر يزيد الإيراد الكلي."
     )
 else:
     st.info(
-        "When demand is inelastic, price and total revenue move in the same direction."
+        "Demand is inelastic. A price increase increases total revenue."
         if lang == "English"
         else
-        "عندما يكون الطلب غير مرن، يتحرك السعر والإيراد الكلي في نفس الاتجاه."
+        "الطلب غير مرن. رفع السعر يزيد الإيراد الكلي."
     )
 
+# ---------------------------------
 # Demand curve visualization
+# ---------------------------------
+price_range_el = np.linspace(P1 * 0.6, P2 * 1.4, 50)
+demand_curve_el = a - b_el * price_range_el
+
 elasticity_graph = pd.DataFrame({
-    "Demand": [Q1, Q2]
-}, index=[P1, P2])
+    "Demand": demand_curve_el
+}, index=price_range_el)
 
 st.line_chart(elasticity_graph)
+
+st.caption(
+    "Elasticity differs across demand curves and increases in the long run."
+    if lang == "English"
+    else
+    "تختلف المرونة باختلاف شكل منحنى الطلب وتزداد في المدى الطويل."
+)
 
 # =================================
 # MACROECONOMICS
