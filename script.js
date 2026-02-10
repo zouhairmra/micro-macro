@@ -1,72 +1,29 @@
-let lang = "en";
-let chart;
+# -----------------------
+# MICROECONOMICS
+# -----------------------
+st.header(MICRO)
+st.write(
+    "Supply and Demand Simulation"
+    if lang == "English"
+    else "محاكاة العرض والطلب"
+)
 
-function toggleLanguage() {
-  lang = lang === "en" ? "ar" : "en";
-  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+price = st.slider(
+    PRICE_LABEL,
+    min_value=0,
+    max_value=100,
+    value=40
+)
 
-  const text = {
-    en: {
-      title: "Economics Simulations",
-      microTitle: "Microeconomics",
-      microDesc: "Price Competition Simulation (Bertrand)",
-      priceLabel: "Choose your price:",
-      runBtn: "Run Simulation",
-      macroTitle: "Macroeconomics",
-      macroDesc: "Policy Simulations",
-      coming: "Coming Soon",
-      thPrice: "Price",
-      thQuantity: "Quantity",
-      thProfit: "Profit"
-    },
-    ar: {
-      title: "محاكاة الاقتصاد",
-      microTitle: "الاقتصاد الجزئي",
-      microDesc: "محاكاة المنافسة السعرية",
-      priceLabel: "اختر السعر:",
-      runBtn: "تشغيل المحاكاة",
-      macroTitle: "الاقتصاد الكلي",
-      macroDesc: "محاكاة السياسات الاقتصادية",
-      coming: "قريباً",
-      thPrice: "السعر",
-      thQuantity: "الكمية",
-      thProfit: "الربح"
-    }
-  };
+# Random market parameters
+a = np.random.randint(120, 160)   # demand intercept
+b = np.random.randint(1, 3)       # demand slope
+c = np.random.randint(10, 40)     # supply intercept
+d = np.random.randint(1, 3)       # supply slope
 
-  for (let id in text[lang]) {
-    document.getElementById(id).innerText = text[lang][id];
-  }
-}
+Qd = max(0, a - b * price)
+Qs = max(0, c + d * price)
 
-function runSimulation() {
-  const price = Number(document.getElementById("priceInput").value);
-  const mc = Math.floor(Math.random() * 10) + 10;
-  const demand = 120;
-  const quantity = Math.max(0, demand - price);
-  const profit = (price - mc) * quantity;
-
-  document.getElementById("resPrice").innerText = price;
-  document.getElementById("resQty").innerText = quantity;
-  document.getElementById("resProfit").innerText = profit.toFixed(2);
-
-  drawChart(price, quantity);
-}
-
-function drawChart(price, quantity) {
-  const ctx = document.getElementById("chart").getContext("2d");
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: ["0", "Price"],
-      datasets: [{
-        label: lang === "ar" ? "الطلب" : "Demand",
-        data: [120, quantity],
-        borderWidth: 2
-      }]
-    }
-  });
-}
+# Market outcome
+if Qd > Qs:
+    market_status = "Sh_
