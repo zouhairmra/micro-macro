@@ -150,41 +150,26 @@ graph_data = pd.DataFrame({
 st.line_chart(graph_data)
 
 # =================================================
-# 3️⃣ ELASTICITY OF DEMAND
+# 3️⃣ ELASTICITY OF DEMAND (IMPROVED)
 # =================================================
 st.subheader(ELASTICITY)
 
-price_change = st.slider(
-    "Price change (%)" if lang == "English" else "نسبة تغير السعر (%)",
-    min_value=-50,
-    max_value=50,
-    value=10
-)
-
-new_price = eq_price * (1 + price_change / 100)
-new_Q = max(0, a - b * new_price)
-
-elasticity = ((new_Q - eq_quantity) / eq_quantity) / ((new_price - eq_price) / eq_price)
-
-elasticity_type = (
-    "Elastic" if abs(elasticity) > 1 else
-    "Inelastic" if abs(elasticity) < 1 else
-    "Unit Elastic"
-)
-
-elasticity_table = pd.DataFrame({
-    "Elasticity Value" if lang == "English" else "قيمة المرونة": [round(elasticity, 2)],
-    "Type" if lang == "English" else "النوع": [elasticity_type]
-})
-
-st.table(elasticity_table)
-
-st.caption(
-    "Elasticity measures the responsiveness of quantity demanded to price changes."
+st.write(
+    "Price Elasticity of Demand (Midpoint Method)"
     if lang == "English"
     else
-    "تقيس المرونة مدى استجابة الكمية المطلوبة للتغير في السعر."
+    "مرونة الطلب السعرية (طريقة المنتصف)"
 )
+
+# Two price points
+P1 = st.slider(
+    "Initial Price" if lang == "English" else "السعر الابتدائي",
+    min_value=int(eq_price * 0.6),
+    max_value=int(eq_price * 1.4),
+    value=int(eq_price * 0.9)
+)
+
+P2 = st.slider
 
 # =================================
 # MACROECONOMICS
