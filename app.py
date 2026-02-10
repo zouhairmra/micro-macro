@@ -1,87 +1,59 @@
-import streamlit as st
-import numpy as np
-import pandas as pd
-
-# -----------------------
-# Page config
-# -----------------------
-st.set_page_config(page_title="Economics Simulations", layout="centered")
-
-# -----------------------
-# Language toggle
-# -----------------------
-lang = st.sidebar.radio(
-    "Language / اللغة",
-    ["English", "العربية"]
-)
-
-if lang == "العربية":
-    st.markdown("<div dir='rtl'>", unsafe_allow_html=True)
-    TITLE = "محاكاة الاقتصاد"
-    MICRO = "الاقتصاد الجزئي"
-    MACRO = "الاقتصاد الكلي"
-    PRICE_LABEL = "اختر السعر"
-    RUN = "تشغيل المحاكاة"
-    COMING = "قريباً"
-    PROFIT = "الربح"
-    QUANTITY = "الكمية"
-else:
-    TITLE = "Economics Simulations"
-    MICRO = "Microeconomics"
-    MACRO = "Macroeconomics"
-    PRICE_LABEL = "Choose your price"
-    RUN = "Run Simulation"
-    COMING = "Coming Soon"
-    PROFIT = "Profit"
-    QUANTITY = "Quantity"
-
-# -----------------------
-# Title
-# -----------------------
-st.title(TITLE)
-
 # -----------------------
 # MICROECONOMICS
 # -----------------------
 st.header(MICRO)
-st.write("Price Competition Simulation (Bertrand-style)")
+st.write(
+    "Supply and Demand Simulation"
+    if lang == "English"
+    else "محاكاة العرض والطلب"
+)
 
-price = st.number_input(PRICE_LABEL, min_value=0, value=30)
+price = st.slider(
+    PRICE_LABEL,
+    min_value=0,
+    max_value=100,
+    value=40
+)
 
-if st.button(RUN):
-    mc = np.random.randint(10, 20)     # random marginal cost
-    demand = 120
-    quantity = max(0, demand - price)
-    profit = (price - mc) * quantity
+# Random market parameters
+a = np.random.randint(120, 160)   # demand intercept
+b = np.random.randint(1, 3)       # demand slope
+c = np.random.randint(10, 40)     # supply intercept
+d = np.random.randint(1, 3)       # supply slope
 
-    results = pd.DataFrame({
-        PRICE_LABEL: [price],
-        QUANTITY: [quantity],
-        PROFIT: [profit]
-    })
+Qd = max(0, a - b * price)
+Qs = max(0, c + d * price)
 
-    st.subheader("Results")
-    st.table(results)
+# Market outcome
+if Qd > Qs:
+    market_status = "Shortage" if lang == "English" else "عجز"
+elif Qs > Qd:
+    market_status = "Surplus" if lang == "English" else "فائض"
+else:
+    market_status = "Equilibrium" if lang == "English" else "توازن"
 
-    # Demand curve (simple & academic)
-    st.line_chart({
-        "Demand": [120, quantity]
-    })
+# Results table
+results = pd.DataFrame({
+    PRICE_LABEL: [price],
+    "Quantity Demanded" if lang == "English" else "الكمية المطلوبة": [Qd],
+    "Quantity Supplied" if lang == "English" else "الكمية المعروضة": [Qs],
+    "Market Status" if lang == "English" else "حالة السوق": [market_status]
+})
 
-    st.caption(
-        "This simulation illustrates price competition and profit outcomes under random market conditions."
-        if lang == "English"
-        else
-        "توضح هذه المحاكاة المنافسة السعرية وتأثيرها على الأرباح في ظل ظروف سوق عشوائية."
-    )
+st.subheader("Results" if lang == "English" else "النتائج")
+st.table(results)
 
-# -----------------------
-# MACROECONOMICS
-# -----------------------
-st.markdown("---")
-st.header(MACRO)
-st.info(COMING)
+# Supply & Demand graph
+chart_data = pd.DataFrame({
+    "Demand": [a, Qd],
+    "Supply": [c, Qs]
+})
 
-# Close RTL div
-if lang == "العربية":
-    st.markdown("</div>", unsafe_allow_html=True)
+st.line_chart(chart_data)
+
+st.caption(
+    "This simulation helps students visualize market equilibrium, shortages, and surpluses."
+    if lang == "English"
+    else
+    "تساعد هذه المحاكاة الطلبة على فهم توازن السوق وحالات العجز والفائض."
+)
