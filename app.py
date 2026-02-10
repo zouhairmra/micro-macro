@@ -13,10 +13,7 @@ st.set_page_config(
 # ---------------------------------
 # Language toggle
 # ---------------------------------
-lang = st.sidebar.radio(
-    "Language / اللغة",
-    ["English", "العربية"]
-)
+lang = st.sidebar.radio("Language / اللغة", ["English", "العربية"])
 
 if lang == "العربية":
     st.markdown("<div dir='rtl'>", unsafe_allow_html=True)
@@ -24,7 +21,7 @@ if lang == "العربية":
     TITLE = "محاكاة الاقتصاد"
     MICRO = "الاقتصاد الجزئي"
     MACRO = "الاقتصاد الكلي"
-    PRICE_LABEL = "السعر"
+    PRICE = "السعر"
     RESULTS = "النتائج"
     QD = "الكمية المطلوبة"
     QS = "الكمية المعروضة"
@@ -32,14 +29,17 @@ if lang == "العربية":
     SHORTAGE = "عجز"
     SURPLUS = "فائض"
     EQUILIBRIUM = "توازن"
-    COMING = "قريباً"
     EQ_PRICE = "سعر التوازن"
+    DEMAND_SHIFT = "عوامل تحريك منحنى الطلب"
+    SUPPLY_SHIFT = "عوامل تحريك منحنى العرض"
+    ELASTICITY = "مرونة الطلب"
+    COMING = "قريباً"
 
 else:
     TITLE = "Economics Simulations"
     MICRO = "Microeconomics"
     MACRO = "Macroeconomics"
-    PRICE_LABEL = "Price"
+    PRICE = "Price"
     RESULTS = "Results"
     QD = "Quantity Demanded"
     QS = "Quantity Supplied"
@@ -47,8 +47,11 @@ else:
     SHORTAGE = "Shortage"
     SURPLUS = "Surplus"
     EQUILIBRIUM = "Equilibrium"
-    COMING = "Coming Soon"
     EQ_PRICE = "Equilibrium Price"
+    DEMAND_SHIFT = "Demand Curve Shifters"
+    SUPPLY_SHIFT = "Supply Curve Shifters"
+    ELASTICITY = "Elasticity of Demand"
+    COMING = "Coming Soon"
 
 # ---------------------------------
 # Title
@@ -59,48 +62,64 @@ st.title(TITLE)
 # MICROECONOMICS
 # =================================
 st.header(MICRO)
-st.write(
-    "Supply and Demand Simulation"
+
+# =================================================
+# 1️⃣ DEMAND & SUPPLY SHIFTERS
+# =================================================
+st.subheader(DEMAND_SHIFT)
+
+demand_factor = st.selectbox(
+    "Select a factor" if lang == "English" else "اختر عاملاً",
+    ["None", "Income Increase", "Income Decrease", "Substitutes", "Population Growth"]
     if lang == "English"
     else
-    "محاكاة العرض والطلب"
+    ["لا شيء", "زيادة الدخل", "انخفاض الدخل", "سلع بديلة", "نمو السكان"]
 )
 
-# ---------------------------------
-# Market parameters (fixed per run)
-# ---------------------------------
-a = np.random.randint(140, 180)   # Demand intercept
-b = np.random.randint(1, 3)       # Demand slope
-c = np.random.randint(10, 40)     # Supply intercept
-d = np.random.randint(1, 3)       # Supply slope
+st.subheader(SUPPLY_SHIFT)
 
-# ---------------------------------
-# Equilibrium calculation
-# Qd = a - bP
-# Qs = c + dP
-# ---------------------------------
+supply_factor = st.selectbox(
+    "Select a factor" if lang == "English" else "اختر عاملاً",
+    ["None", "Technology Improvement", "Input Cost Increase", "Taxes"]
+    if lang == "English"
+    else
+    ["لا شيء", "تحسن التكنولوجيا", "زيادة تكلفة المدخلات", "الضرائب"]
+)
+
+# Base parameters
+a, b = 160, 2   # Demand
+c, d = 20, 2    # Supply
+
+# Apply demand shifts
+if demand_factor in ["Income Increase", "زيادة الدخل", "Population Growth", "نمو السكان"]:
+    a += 20
+elif demand_factor in ["Income Decrease", "انخفاض الدخل"]:
+    a -= 20
+
+# Apply supply shifts
+if supply_factor in ["Technology Improvement", "تحسن التكنولوجيا"]:
+    c -= 10
+elif supply_factor in ["Input Cost Increase", "زيادة تكلفة المدخلات", "Taxes", "الضرائب"]:
+    c += 10
+
+# =================================================
+# 2️⃣ EQUILIBRIUM
+# =================================================
+st.subheader(EQUILIBRIUM)
+
 eq_price = (a - c) / (b + d)
 eq_quantity = a - b * eq_price
 
-# ---------------------------------
-# Price slider (restricted range)
-# ---------------------------------
 price = st.slider(
-    PRICE_LABEL,
+    PRICE,
     min_value=int(eq_price * 0.5),
     max_value=int(eq_price * 1.5),
     value=int(eq_price)
 )
 
-# ---------------------------------
-# Quantities
-# ---------------------------------
-Qd_value = max(0, a - b * price)
-Qs_value = max(0, c + d * price)
+Qd_val = max(0, a - b * price)
+Qs_val = max(0, c + d * price)
 
-# ---------------------------------
-# Market status
-# ---------------------------------
 if price < eq_price:
     market_status = SHORTAGE
 elif price > eq_price:
@@ -108,24 +127,17 @@ elif price > eq_price:
 else:
     market_status = EQUILIBRIUM
 
-# ---------------------------------
-# Results table
-# ---------------------------------
 results = pd.DataFrame({
-    PRICE_LABEL: [round(price, 2)],
-    QD: [round(Qd_value, 2)],
-    QS: [round(Qs_value, 2)],
+    PRICE: [round(price, 2)],
+    QD: [round(Qd_val, 2)],
+    QS: [round(Qs_val, 2)],
     STATUS: [market_status]
 })
 
-st.subheader(RESULTS)
+st.write(f"**{EQ_PRICE}: {round(eq_price,2)}**")
 st.table(results)
 
-st.write(f"**{EQ_PRICE}: {round(eq_price,2)}**")
-
-# ---------------------------------
-# Graphical visualization
-# ---------------------------------
+# Graph
 price_range = np.linspace(eq_price * 0.5, eq_price * 1.5, 50)
 demand_curve = a - b * price_range
 supply_curve = c + d * price_range
@@ -137,38 +149,41 @@ graph_data = pd.DataFrame({
 
 st.line_chart(graph_data)
 
-# ---------------------------------
-# Visual explanation
-# ---------------------------------
-if market_status == SHORTAGE:
-    st.warning(
-        "At this price, quantity demanded exceeds quantity supplied (Shortage)."
-        if lang == "English"
-        else
-        "عند هذا السعر، الكمية المطلوبة أكبر من الكمية المعروضة (عجز)."
-    )
+# =================================================
+# 3️⃣ ELASTICITY OF DEMAND
+# =================================================
+st.subheader(ELASTICITY)
 
-elif market_status == SURPLUS:
-    st.info(
-        "At this price, quantity supplied exceeds quantity demanded (Surplus)."
-        if lang == "English"
-        else
-        "عند هذا السعر، الكمية المعروضة أكبر من الكمية المطلوبة (فائض)."
-    )
+price_change = st.slider(
+    "Price change (%)" if lang == "English" else "نسبة تغير السعر (%)",
+    min_value=-50,
+    max_value=50,
+    value=10
+)
 
-else:
-    st.success(
-        "Market equilibrium: quantity demanded equals quantity supplied."
-        if lang == "English"
-        else
-        "توازن السوق: الكمية المطلوبة تساوي الكمية المعروضة."
-    )
+new_price = eq_price * (1 + price_change / 100)
+new_Q = max(0, a - b * new_price)
+
+elasticity = ((new_Q - eq_quantity) / eq_quantity) / ((new_price - eq_price) / eq_price)
+
+elasticity_type = (
+    "Elastic" if abs(elasticity) > 1 else
+    "Inelastic" if abs(elasticity) < 1 else
+    "Unit Elastic"
+)
+
+elasticity_table = pd.DataFrame({
+    "Elasticity Value" if lang == "English" else "قيمة المرونة": [round(elasticity, 2)],
+    "Type" if lang == "English" else "النوع": [elasticity_type]
+})
+
+st.table(elasticity_table)
 
 st.caption(
-    "The shaded price range ensures that supply and demand always intersect."
+    "Elasticity measures the responsiveness of quantity demanded to price changes."
     if lang == "English"
     else
-    "تم تحديد مجال السعر بحيث يضمن تقاطع العرض والطلب دائماً."
+    "تقيس المرونة مدى استجابة الكمية المطلوبة للتغير في السعر."
 )
 
 # =================================
@@ -179,7 +194,7 @@ st.header(MACRO)
 st.info(COMING)
 
 # ---------------------------------
-# Close RTL container
+# Close RTL
 # ---------------------------------
 if lang == "العربية":
     st.markdown("</div>", unsafe_allow_html=True)
