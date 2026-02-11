@@ -303,27 +303,71 @@ st.subheader(
     "Cross-Price Elasticity" if lang == "English" else "المرونة العرضية"
 )
 
-Px = st.slider(
-    "Price of Related Good X" if lang == "English" else "سعر السلعة المرتبطة X",
-    min_value=int(eq_price * 0.5),
-    max_value=int(eq_price * 1.5),
-    value=int(eq_price)
+st.markdown(
+    "Effect of a change in the price of a related good (X) on quantity demanded of this good."
+    if lang == "English"
+    else "تأثير تغير سعر سلعة مرتبطة (X) على الكمية المطلوبة من هذه السلعة."
 )
 
-Qx1 = Q1  # Quantity of your product at initial price
-Qx2 = max(0, a - b_el * P1 + 0.2*(Px-P1))  # Simple assumed cross-effect
+Px1 = st.slider(
+    "Initial Price of Related Good X" if lang == "English" else "السعر الابتدائي للسلعة X",
+    min_value=int(eq_price * 0.5),
+    max_value=int(eq_price * 1.5),
+    value=int(eq_price * 0.9)
+)
 
-cross_elasticity = ((Qx2 - Qx1)/((Qx1 + Qx2)/2)) / ((Px - P1)/((Px + P1)/2))
+Px2 = st.slider(
+    "New Price of Related Good X" if lang == "English" else "السعر الجديد للسلعة X",
+    min_value=int(eq_price * 0.5),
+    max_value=int(eq_price * 1.5),
+    value=int(eq_price * 1.1)
+)
+
+# Cross-effect parameter (positive = substitutes, negative = complements)
+cross_effect = st.slider(
+    "Cross Effect Strength"
+    if lang == "English"
+    else "قوة العلاقة بين السلعتين",
+    min_value=-2.0,
+    max_value=2.0,
+    value=1.0,
+    step=0.1
+)
+
+Qx1 = max(0, a - b_el * P1 + cross_effect * Px1)
+Qx2 = max(0, a - b_el * P1 + cross_effect * Px2)
+
+cross_elasticity = (
+    ((Qx2 - Qx1) / ((Qx1 + Qx2) / 2)) /
+    ((Px2 - Px1) / ((Px1 + Px2) / 2))
+)
 
 if cross_elasticity > 0:
     cross_type = "Substitutes" if lang == "English" else "سلع بديلة"
-else:
+elif cross_elasticity < 0:
     cross_type = "Complements" if lang == "English" else "سلع تكميلية"
+else:
+    cross_type = "Independent Goods" if lang == "English" else "سلع مستقلة"
 
 st.write(
     f"**Cross-Price Elasticity = {round(cross_elasticity,2)} → {cross_type}**"
 )
 
+# ----- GRAPH -----
+px_range = np.linspace(Px1 * 0.6, Px2 * 1.4, 50)
+cross_curve = a - b_el * P1 + cross_effect * px_range
+
+cross_graph = pd.DataFrame({
+    "Quantity Demanded": cross_curve
+}, index=px_range)
+
+st.line_chart(cross_graph)
+
+st.caption(
+    "Positive elasticity → Substitutes | Negative elasticity → Complements"
+    if lang == "English"
+    else "إشارة موجبة → بدائل | إشارة سالبة → مكملات"
+)
 # =================================================
 # 5️⃣ INCOME ELASTICITY
 # =================================================
@@ -331,37 +375,72 @@ st.subheader(
     "Income Elasticity" if lang == "English" else "مرونة الدخل"
 )
 
-income = st.slider(
-    "Consumer Income" if lang == "English" else "دخل المستهلك",
-    min_value=1000,
-    max_value=10000,
-    value=5000,
-    step=100
+st.markdown(
+    "Effect of income changes on quantity demanded."
+    if lang == "English"
+    else "تأثير تغير الدخل على الكمية المطلوبة."
 )
 
-Q_inc1 = Q1
-Q_inc2 = max(0, Q1 + 0.0005*(income-5000))  # Simple assumed income effect
+Y1 = st.slider(
+    "Initial Income" if lang == "English" else "الدخل الابتدائي",
+    min_value=1000,
+    max_value=20000,
+    value=5000,
+    step=500
+)
 
-income_elasticity = ((Q_inc2 - Q_inc1)/((Q_inc1 + Q_inc2)/2)) / ((income - 5000)/((income + 5000)/2))
+Y2 = st.slider(
+    "New Income" if lang == "English" else "الدخل الجديد",
+    min_value=1000,
+    max_value=20000,
+    value=8000,
+    step=500
+)
 
-if income_elasticity > 0:
-    inc_type = "Normal Good" if lang == "English" else "سلعة عادية"
+income_effect = st.slider(
+    "Income Effect Strength"
+    if lang == "English"
+    else "قوة تأثير الدخل",
+    min_value=-0.005,
+    max_value=0.005,
+    value=0.002,
+    step=0.0005
+)
+
+Qi1 = max(0, a - b_el * P1 + income_effect * Y1)
+Qi2 = max(0, a - b_el * P1 + income_effect * Y2)
+
+income_elasticity = (
+    ((Qi2 - Qi1) / ((Qi1 + Qi2) / 2)) /
+    ((Y2 - Y1) / ((Y1 + Y2) / 2))
+)
+
+if income_elasticity > 1:
+    income_type = "Luxury Good" if lang == "English" else "سلعة كمالية"
+elif income_elasticity > 0:
+    income_type = "Normal Good" if lang == "English" else "سلعة عادية"
+elif income_elasticity < 0:
+    income_type = "Inferior Good" if lang == "English" else "سلعة دنيا"
 else:
-    inc_type = "Inferior Good" if lang == "English" else "سلعة دنيا"
+    income_type = "Income Neutral" if lang == "English" else "محايدة للدخل"
 
 st.write(
-    f"**Income Elasticity = {round(income_elasticity,2)} → {inc_type}**"
+    f"**Income Elasticity = {round(income_elasticity,2)} → {income_type}**"
 )
 
-# =================================
-# MACROECONOMICS
-# =================================
-st.markdown("---")
-st.header(MACRO)
-st.info(COMING)
+# ----- GRAPH -----
+income_range = np.linspace(Y1 * 0.6, Y2 * 1.4, 50)
+income_curve = a - b_el * P1 + income_effect * income_range
 
-# ---------------------------------
-# Close RTL
-# ---------------------------------
-if lang == "العربية":
-    st.markdown("</div>", unsafe_allow_html=True)
+income_graph = pd.DataFrame({
+    "Quantity Demanded": income_curve
+}, index=income_range)
+
+st.line_chart(income_graph)
+
+st.caption(
+    "Positive → Normal/Luxury | Negative → Inferior"
+    if lang == "English"
+    else "موجب → عادية/كمالية | سالب → دنيا"
+)
+
