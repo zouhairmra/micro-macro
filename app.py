@@ -443,4 +443,147 @@ st.caption(
     if lang == "English"
     else "موجب → عادية/كمالية | سالب → دنيا"
 )
+# =================================================
+# 6️⃣ AUTO-GENERATED QUIZ
+# =================================================
+st.subheader(
+    "Elasticity Quiz"
+    if lang == "English"
+    else "اختبار المرونة"
+)
+
+# Initialize score
+if "score" not in st.session_state:
+    st.session_state.score = 0
+
+if "question_number" not in st.session_state:
+    st.session_state.question_number = 1
+
+st.markdown(
+    f"**Question {st.session_state.question_number}**"
+    if lang == "English"
+    else f"**السؤال {st.session_state.question_number}**"
+)
+
+# Randomly choose question type
+import random
+question_type = random.choice(["own", "cross", "income"])
+
+# -------------------------------
+# OWN-PRICE QUESTION
+# -------------------------------
+if question_type == "own":
+    
+    correct_answer = elasticity_type
+    
+    question_text = (
+        f"If price changes from {P1} to {P2}, demand is:"
+        if lang == "English"
+        else f"إذا تغير السعر من {P1} إلى {P2} فإن الطلب:"
+    )
+    
+    options = ["Elastic", "Inelastic", "Unit Elastic"] if lang == "English" else ["مرن", "غير مرن", "مرونة وحدية"]
+
+# -------------------------------
+# CROSS-PRICE QUESTION
+# -------------------------------
+elif question_type == "cross":
+    
+    correct_answer = cross_type
+    
+    question_text = (
+        "The relationship between the two goods is:"
+        if lang == "English"
+        else "العلاقة بين السلعتين هي:"
+    )
+    
+    options = ["Substitutes", "Complements", "Independent Goods"] if lang == "English" else ["سلع بديلة", "سلع تكميلية", "سلع مستقلة"]
+
+# -------------------------------
+# INCOME QUESTION
+# -------------------------------
+else:
+    
+    correct_answer = income_type
+    
+    question_text = (
+        "Based on income elasticity, the good is:"
+        if lang == "English"
+        else "بناءً على مرونة الدخل، السلعة هي:"
+    )
+    
+    options = ["Luxury Good", "Normal Good", "Inferior Good", "Income Neutral"] if lang == "English" else ["سلعة كمالية", "سلعة عادية", "سلعة دنيا", "محايدة للدخل"]
+
+st.write(question_text)
+
+answer = st.radio(
+    "Choose your answer:" if lang == "English" else "اختر الإجابة:",
+    options
+)
+
+if st.button("Submit Answer" if lang == "English" else "إرسال الإجابة"):
+    
+    if answer == correct_answer:
+        st.success("Correct!" if lang == "English" else "إجابة صحيحة!")
+        st.session_state.score += 1
+    else:
+        st.error(
+            f"Wrong! Correct answer: {correct_answer}"
+            if lang == "English"
+            else f"إجابة خاطئة! الإجابة الصحيحة: {correct_answer}"
+        )
+    
+    st.session_state.question_number += 1
+
+st.write(
+    f"Score: {st.session_state.score}"
+    if lang == "English"
+    else f"النتيجة: {st.session_state.score}"
+)
+# =================================================
+# 7️⃣ CLASSROOM COMPETITION MODE
+# =================================================
+st.subheader(
+    "Classroom Competition"
+    if lang == "English"
+    else "مسابقة الصف"
+)
+
+player_name = st.text_input(
+    "Enter your name" if lang == "English" else "أدخل اسمك"
+)
+
+if "leaderboard" not in st.session_state:
+    st.session_state.leaderboard = {}
+
+if st.button("Save Score" if lang == "English" else "حفظ النتيجة"):
+    
+    if player_name:
+        st.session_state.leaderboard[player_name] = st.session_state.score
+        st.success(
+            "Score saved!"
+            if lang == "English"
+            else "تم حفظ النتيجة!"
+        )
+
+# Display leaderboard
+if st.session_state.leaderboard:
+    
+    leaderboard_df = pd.DataFrame(
+        list(st.session_state.leaderboard.items()),
+        columns=[
+            "Player" if lang == "English" else "الطالب",
+            "Score" if lang == "English" else "النتيجة"
+        ]
+    ).sort_values(
+        by="Score" if lang == "English" else "النتيجة",
+        ascending=False
+    )
+    
+    st.table(leaderboard_df)
+
+if st.button("Reset Competition" if lang == "English" else "إعادة تعيين المسابقة"):
+    st.session_state.leaderboard = {}
+    st.session_state.score = 0
+    st.session_state.question_number = 1
 
