@@ -1,7 +1,8 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-
+from database import init_db, save_score, get_scores
+init_db()
 # ---------------------------------
 # Page configuration
 # ---------------------------------
