@@ -1,6 +1,7 @@
 import streamlit as st
 from config import get_text
-from modules import demand_supply, elasticity, quiz, competition, teacher_panel
+from modules import demand_supply, elasticity, quiz, competition, teacher_panel, chatbot
+
 
 # =================================================
 # PAGE CONFIG
