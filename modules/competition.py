@@ -65,6 +65,3 @@ def run(lang="English"):
             df = df.sort_values("Score", ascending=False)
             st.table(df)
 
-    # Auto refresh
-    time.sleep(1)
-    st.experimental_rerun()
