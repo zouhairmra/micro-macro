@@ -1,12 +1,12 @@
 TEXT = {
-    "title": {"English": "Economics Classroom Platform", "العربية": "منصة الاقتصاد التعليمية"},
     "navigation": {"English": "Navigation", "العربية": "التنقل"},
     "demand_supply": {"English": "Demand & Supply", "العربية": "العرض والطلب"},
     "elasticity": {"English": "Elasticity", "العربية": "المرونة"},
-    "quiz": {"English": "Practice Quiz", "العربية": "اختبار تدريبي"},
-    "competition": {"English": "Live Classroom Competition", "العربية": "مسابقة الصف المباشرة"},
-    "teacher_panel": {"English": "Teacher Control Panel", "العربية": "لوحة التحكم للمعلم"}
+    "quiz": {"English": "Practice Quiz", "العربية": "الاختبار التدريبي"},
+    "competition": {"English": "Competition", "العربية": "المسابقة"},
+    "teacher_panel": {"English": "Teacher Panel", "العربية": "لوحة المعلم"},
+    "chatbot": {"English": "AI Question Bot", "العربية": "بوت الأسئلة الذكي"}  # <-- clé ajoutée
 }
 
 def get_text(key, lang="English"):
-    return TEXT.get(key, {}).get(lang, key)
+    return TEXT[key][lang]
