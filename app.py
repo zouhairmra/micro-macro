@@ -15,14 +15,13 @@ lang = st.sidebar.selectbox("Language", ["English", "العربية"])
 # =================================================
 # PAGE NAVIGATION
 # =================================================
-# Ajout du chatbot
 pages = {
     get_text("demand_supply", lang): demand_supply,
     get_text("elasticity", lang): elasticity,
     get_text("quiz", lang): quiz,
-    get_text("competition", lang): competition,
+    get_text("competition", lang): competition,  # Competition améliorée avec chatbot intégré
     get_text("teacher_panel", lang): teacher_panel,
-    get_text("chatbot", lang): chatbot  # <-- ajout du chatbot
+    get_text("chatbot", lang): chatbot  # Chatbot autonome
 }
 
 page_choice = st.sidebar.radio(get_text("navigation", lang), list(pages.keys()))
