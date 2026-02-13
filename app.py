@@ -56,6 +56,23 @@ else:
     SUPPLY_SHIFT = "Supply Curve Shifters"
     ELASTICITY = "Elasticity of Demand"
     COMING = "Coming Soon"
+# =================================================
+# CLASSROOM MODE
+# =================================================
+
+st.sidebar.title("🎓 Classroom Competition")
+
+mode = st.sidebar.radio(
+    "Mode",
+    ["Student", "Teacher"]
+)
+
+classroom_code = st.sidebar.text_input("Classroom Code")
+
+player_name = ""
+
+if mode == "Student":
+    player_name = st.sidebar.text_input("Your Name")
 
 # ---------------------------------
 # Title
