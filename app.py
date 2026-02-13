@@ -83,6 +83,19 @@ TEXT = {
 }
 
 }
+# =================================================
+# PAGE NAVIGATION
+# =================================================
+
+page = st.sidebar.selectbox(
+    "Select Page" if lang == "English" else "اختر الصفحة",
+    [
+        "Simulation",
+        "Quiz",
+        "Competition",
+        "Teacher Control Panel"
+    ]
+)
 
 # =================================================
 # TITLE
