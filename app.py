@@ -14,6 +14,17 @@ import time
 from database import init_db, save_score, get_scores
 
 init_db()
+if "competition_active" not in st.session_state:
+    st.session_state.competition_active = False
+
+if "current_question" not in st.session_state:
+    st.session_state.current_question = None
+
+if "question_duration" not in st.session_state:
+    st.session_state.question_duration = 20
+
+if "question_start_time" not in st.session_state:
+    st.session_state.question_start_time = 0
 
 # =================================================
 # PAGE CONFIG
@@ -352,3 +363,64 @@ elif page == TEXT["competition"][lang]:
 
     time.sleep(1)
     st.rerun()
+
+if st.button("Reset Competition" if lang == "English" else "إعادة تعيين المسابقة"):
+    st.session_state.leaderboard = {}
+    st.session_state.score = 0
+    st.session_state.question_number = 1
+
+
+# =================================================
+# TEACHER CONTROL PANEL  ← ADD HERE
+# =================================================
+
+if page == "Teacher Control Panel":
+
+    st.header("Teacher Control Panel")
+
+    password = st.text_input(
+        "Enter Teacher Password",
+        type="password"
+    )
+
+    if password == "admin123":
+
+        st.success("Teacher mode activated")
+
+        duration = st.slider(
+            "Question duration (seconds)",
+            5,
+            60,
+            20
+        )
+
+        st.session_state.question_duration = duration
+
+        if st.button("Start Competition"):
+
+            st.session_state.competition_active = True
+
+            st.session_state.current_question = generate_question()
+
+            st.session_state.question_start_time = time.time()
+
+        if st.button("Stop Competition"):
+
+            st.session_state.competition_active = False
+
+        if st.button("Next Question"):
+
+            st.session_state.current_question = generate_question()
+
+            st.session_state.question_start_time = time.time()
+
+        if st.session_state.current_question:
+
+            st.write(
+                st.session_state.current_question["question"]
+            )
+
+    else:
+
+        st.warning("Enter correct password")
+
