@@ -1,25 +1,26 @@
 # =================================================
 # MICRO & MACRO ECONOMICS PLATFORM
-# Professional organized version (single-file)
+# Real-time classroom competition version
+# Single-file professional app.py
 # =================================================
 
-import streamlit as st 
+import streamlit as st
 import numpy as np
 import pandas as pd
 import random
+import time
 
-# Database
+# database functions
 from database import init_db, save_score, get_scores
 
-# Initialize database
 init_db()
 
 # =================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # =================================================
 
 st.set_page_config(
-    page_title="Micro & Macro Economics Platform",
+    page_title="Economics Classroom Platform",
     layout="wide"
 )
 
@@ -37,7 +38,7 @@ def load_css():
 load_css()
 
 # =================================================
-# LANGUAGE SELECTION
+# LANGUAGE
 # =================================================
 
 lang = st.sidebar.selectbox(
@@ -45,38 +46,41 @@ lang = st.sidebar.selectbox(
     ["English", "العربية"]
 )
 
-# Labels dictionary
+# =================================================
+# TEXT LABELS
+# =================================================
+
 TEXT = {
 
-    "title": {
-        "English": "Micro & Macro Economics Platform",
-        "العربية": "منصة الاقتصاد الجزئي والكلي"
-    },
+"title": {
+"English": "Economics Classroom Platform",
+"العربية": "منصة الاقتصاد التعليمية"
+},
 
-    "navigation": {
-        "English": "Navigation",
-        "العربية": "التنقل"
-    },
+"navigation": {
+"English": "Navigation",
+"العربية": "التنقل"
+},
 
-    "demand_supply": {
-        "English": "Demand & Supply",
-        "العربية": "العرض والطلب"
-    },
+"demand_supply": {
+"English": "Demand & Supply",
+"العربية": "العرض والطلب"
+},
 
-    "elasticity": {
-        "English": "Elasticity",
-        "العربية": "المرونة"
-    },
+"elasticity": {
+"English": "Elasticity",
+"العربية": "المرونة"
+},
 
-    "quiz": {
-        "English": "Quiz",
-        "العربية": "اختبار"
-    },
+"quiz": {
+"English": "Practice Quiz",
+"العربية": "اختبار تدريبي"
+},
 
-    "competition": {
-        "English": "Competition",
-        "العربية": "مسابقة"
-    }
+"competition": {
+"English": "Live Classroom Competition",
+"العربية": "مسابقة الصف المباشرة"
+}
 
 }
 
@@ -87,21 +91,21 @@ TEXT = {
 st.title(TEXT["title"][lang])
 
 # =================================================
-# NAVIGATION MENU
+# NAVIGATION
 # =================================================
 
 page = st.sidebar.radio(
-    TEXT["navigation"][lang],
-    [
-        TEXT["demand_supply"][lang],
-        TEXT["elasticity"][lang],
-        TEXT["quiz"][lang],
-        TEXT["competition"][lang]
-    ]
+TEXT["navigation"][lang],
+[
+TEXT["demand_supply"][lang],
+TEXT["elasticity"][lang],
+TEXT["quiz"][lang],
+TEXT["competition"][lang]
+]
 )
 
 # =================================================
-# DEMAND & SUPPLY MODULE
+# DEMAND SUPPLY MODULE
 # =================================================
 
 if page == TEXT["demand_supply"][lang]:
@@ -111,33 +115,32 @@ if page == TEXT["demand_supply"][lang]:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Demand")
 
-        a = st.slider("Intercept (a)", 50, 200, 120)
-        b = st.slider("Slope (b)", 1, 10, 3)
+        a = st.slider("Demand intercept", 50, 200, 120)
+        b = st.slider("Demand slope", 1, 10, 3)
 
     with col2:
-        st.subheader("Supply")
 
-        c = st.slider("Intercept (c)", 0, 100, 20)
-        d = st.slider("Slope (d)", 1, 10, 2)
+        c = st.slider("Supply intercept", 0, 100, 20)
+        d = st.slider("Supply slope", 1, 10, 2)
 
-    eq_price = (a - c) / (b + d)
-    eq_quantity = a - b * eq_price
+    eq_price = (a-c)/(b+d)
+    eq_quantity = a - b*eq_price
 
     st.success(
         f"Equilibrium Price = {eq_price:.2f} | Quantity = {eq_quantity:.2f}"
     )
 
-    # Graph
-    prices = np.linspace(0, eq_price * 2, 50)
+    prices = np.linspace(0, eq_price*2, 50)
 
-    demand = a - b * prices
-    supply = c + d * prices
+    demand = a - b*prices
+    supply = c + d*prices
 
     df = pd.DataFrame({
+
         "Demand": demand,
         "Supply": supply
+
     }, index=prices)
 
     st.line_chart(df)
@@ -153,101 +156,186 @@ elif page == TEXT["elasticity"][lang]:
     P1 = st.slider("Initial Price", 1, 100, 20)
     P2 = st.slider("New Price", 1, 100, 30)
 
-    Q1 = st.slider("Initial Quantity", 1, 200, 100)
-    Q2 = st.slider("New Quantity", 1, 200, 80)
+    Q1 = st.slider("Initial Quantity", 10, 200, 100)
+    Q2 = st.slider("New Quantity", 10, 200, 70)
 
     elasticity = (
-        ((Q2 - Q1) / ((Q1 + Q2) / 2)) /
-        ((P2 - P1) / ((P1 + P2) / 2))
+
+        ((Q2-Q1)/((Q1+Q2)/2)) /
+        ((P2-P1)/((P1+P2)/2))
+
     )
 
-    TR1 = P1 * Q1
-    TR2 = P2 * Q2
-
-    st.metric("Elasticity", round(elasticity, 2))
-
-    results = pd.DataFrame({
-
-        "Price": [P1, P2],
-        "Quantity": [Q1, Q2],
-        "Revenue": [TR1, TR2]
-
-    }, index=["Initial", "New"])
-
-    st.table(results)
+    st.metric("Elasticity", round(elasticity,2))
 
 # =================================================
-# QUIZ MODULE
+# PRACTICE QUIZ MODULE
 # =================================================
 
 elif page == TEXT["quiz"][lang]:
 
     st.header(TEXT["quiz"][lang])
 
-    if "score" not in st.session_state:
-        st.session_state.score = 0
+    if "practice_score" not in st.session_state:
+        st.session_state.practice_score = 0
 
-    question = "Demand is elastic if elasticity is:"
+    q = random.choice([
 
-    answer = st.radio(
+        ("Elastic demand means elasticity is:", ">1"),
+        ("Inelastic demand means elasticity is:", "<1"),
+        ("Unit elastic demand means elasticity equals:", "=1")
 
-        question,
-        [
-            " > 1",
-            "< 1",
-            "= 0"
-        ]
+    ])
 
-    )
+    answer = st.radio(q[0], [">1", "<1", "=1"])
 
-    if st.button("Submit"):
+    if st.button("Submit Answer"):
 
-        if answer == "> 1":
+        if answer == q[1]:
 
             st.success("Correct")
-            st.session_state.score += 1
+            st.session_state.practice_score += 1
 
         else:
 
             st.error("Incorrect")
 
-    st.write("Score:", st.session_state.score)
+    st.write("Score:", st.session_state.practice_score)
 
 # =================================================
-# COMPETITION MODULE (MULTIPLAYER DATABASE)
+# LIVE CLASSROOM COMPETITION
 # =================================================
 
 elif page == TEXT["competition"][lang]:
 
     st.header(TEXT["competition"][lang])
 
-    classroom = st.text_input("Classroom Code")
+    col1, col2 = st.columns(2)
 
-    player = st.text_input("Player Name")
+    with col1:
 
-    score = st.number_input("Score", 0, 100, 0)
+        classroom = st.text_input("Classroom Code")
 
-    if st.button("Save Score"):
+        player = st.text_input("Student Name")
 
-        if classroom and player:
+    with col2:
 
-            save_score(classroom, player, score)
+        if "competition_score" not in st.session_state:
+            st.session_state.competition_score = 0
 
-            st.success("Score saved")
+        if "question_id" not in st.session_state:
+            st.session_state.question_id = 1
+
+    # -----------------------------------
+    # GENERATE LIVE QUESTION
+    # -----------------------------------
+
+    questions = [
+
+        {
+            "q": "If elasticity > 1, demand is:",
+            "options": ["Elastic", "Inelastic", "Unit Elastic"],
+            "answer": "Elastic"
+        },
+
+        {
+            "q": "If elasticity < 1, demand is:",
+            "options": ["Elastic", "Inelastic", "Unit Elastic"],
+            "answer": "Inelastic"
+        },
+
+        {
+            "q": "If elasticity = 1, demand is:",
+            "options": ["Elastic", "Inelastic", "Unit Elastic"],
+            "answer": "Unit Elastic"
+        }
+
+    ]
+
+    current_question = random.choice(questions)
+
+    st.subheader(f"Question {st.session_state.question_id}")
+
+    answer = st.radio(
+        current_question["q"],
+        current_question["options"]
+    )
+
+    colA, colB = st.columns(2)
+
+    # -----------------------------------
+    # SUBMIT ANSWER
+    # -----------------------------------
+
+    with colA:
+
+        if st.button("Submit"):
+
+            if answer == current_question["answer"]:
+
+                st.success("Correct!")
+                st.session_state.competition_score += 10
+
+            else:
+
+                st.error("Wrong!")
+
+            st.session_state.question_id += 1
+
+    # -----------------------------------
+    # SAVE SCORE
+    # -----------------------------------
+
+    with colB:
+
+        if st.button("Save to Leaderboard"):
+
+            if classroom and player:
+
+                save_score(
+                    classroom,
+                    player,
+                    st.session_state.competition_score
+                )
+
+                st.success("Saved!")
+
+    # -----------------------------------
+    # DISPLAY SCORE
+    # -----------------------------------
+
+    st.metric(
+        "Your Score",
+        st.session_state.competition_score
+    )
+
+    # -----------------------------------
+    # LIVE LEADERBOARD
+    # -----------------------------------
 
     if classroom:
+
+        st.subheader("Live Leaderboard")
 
         scores = get_scores(classroom)
 
         if scores:
 
             df = pd.DataFrame(
-
                 scores,
-                columns=["Player", "Score"]
-
+                columns=["Student", "Score"]
             )
 
-            st.subheader("Leaderboard")
+            df = df.sort_values(
+                "Score",
+                ascending=False
+            )
 
             st.table(df)
+
+    # -----------------------------------
+    # AUTO REFRESH
+    # -----------------------------------
+
+    time.sleep(1)
+    st.rerun()
