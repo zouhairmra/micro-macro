@@ -3,7 +3,7 @@
 # Professional organized version (single-file)
 # =================================================
 
-import streamlit as st
+import streamlit as st 
 import numpy as np
 import pandas as pd
 import random
@@ -193,7 +193,7 @@ elif page == TEXT["quiz"][lang]:
 
         question,
         [
-            "> 1",
+            " > 1",
             "< 1",
             "= 0"
         ]
