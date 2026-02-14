@@ -170,3 +170,26 @@ def run(lang="English"):
             st.success(SUBSTITUTE)
         else:
             st.warning(COMPLEMENT)
+# =========================
+    # SHOW FORMULA
+    # =========================
+
+    with st.expander("Show formula" if lang=="English" else "عرض الصيغة"):
+
+        if method == METHODS[0]:
+
+            st.latex(r"E = \frac{\%\Delta Q}{\%\Delta P}")
+
+        elif method == METHODS[1]:
+
+            st.latex(
+                r"E = \frac{(Q2-Q1)/((Q1+Q2)/2)}{(P2-P1)/((P1+P2)/2)}"
+            )
+
+        elif method == METHODS[2]:
+
+            st.latex(r"E = \frac{\%\Delta Q}{\%\Delta Income}")
+
+        elif method == METHODS[3]:
+
+            st.latex(r"E = \frac{\%\Delta Q_A}{\%\Delta P_B}")
