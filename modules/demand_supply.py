@@ -5,7 +5,8 @@ import plotly.graph_objects as go
 
 def run(lang="English"):
 
-    st.title("Demand and Supply Simulator")
+    title = "Demand and Supply Simulator" if lang == "English" else "محاكي العرض والطلب"
+    st.title(title)
 
     P = np.linspace(0, 20, 200)
 
@@ -19,7 +20,7 @@ def run(lang="English"):
     Qs = c + d * P
 
     scenario = st.selectbox(
-        "Select scenario",
+        "Select scenario" if lang == "English" else "اختر السيناريو",
         [
             "No shock",
             "Increase in demand (income rise)",
@@ -52,7 +53,7 @@ def run(lang="English"):
 
     elif scenario == "Supply increase (subsidy)":
         supply_shift = 2
-        explanation = "Subsidy → Supply shifts RIGHT (downward)."
+        explanation = "Subsidy → Supply shifts RIGHT."
 
     Qd_new = (a + demand_shift) - b * P
     Qs_new = (c + supply_shift) + d * P
@@ -64,26 +65,24 @@ def run(lang="English"):
         x=Qd,
         y=P,
         mode='lines',
-        name="Original Demand",
-        line=dict(width=4)
+        name="Original Demand"
     ))
 
     fig.add_trace(go.Scatter(
         x=Qs,
         y=P,
         mode='lines',
-        name="Original Supply",
-        line=dict(width=4)
+        name="Original Supply"
     ))
 
-    # New curves
+    # Shifted curves
     if demand_shift != 0:
         fig.add_trace(go.Scatter(
             x=Qd_new,
             y=P,
             mode='lines',
             name="New Demand",
-            line=dict(dash="dash", width=4)
+            line=dict(dash="dash")
         ))
 
     if supply_shift != 0:
@@ -92,11 +91,10 @@ def run(lang="English"):
             y=P,
             mode='lines',
             name="New Supply",
-            line=dict(dash="dash", width=4)
+            line=dict(dash="dash")
         ))
 
     fig.update_layout(
-        title="Demand and Supply Shift Simulation",
         xaxis_title="Quantity",
         yaxis_title="Price",
         template="simple_white"
@@ -104,17 +102,17 @@ def run(lang="English"):
 
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info(explanation)
+    if explanation:
+        st.info(explanation)
 
-    # Economic interpretation
     if demand_shift > 0:
-        st.success("Result: Price ↑ and Quantity ↑")
+        st.success("Price ↑ Quantity ↑")
 
     elif demand_shift < 0:
-        st.warning("Result: Price ↓ and Quantity ↓")
+        st.warning("Price ↓ Quantity ↓")
 
     elif supply_shift > 0:
-        st.success("Result: Price ↓ and Quantity ↑")
+        st.success("Price ↓ Quantity ↑")
 
     elif supply_shift < 0:
-        st.warning("Result: Price ↑ and Quantity ↓")
+        st.warning("Price ↑ Quantity ↓")
