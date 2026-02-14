@@ -17,6 +17,59 @@ def run(lang="English"):
         RESULT_TITLE = "Market result"
         EQUILIBRIUM_TITLE = "Equilibrium"
 
+        SCENARIOS = {
+
+            "No shock": {
+                "demand": 0,
+                "supply": 0,
+                "explanation": "Market is in initial equilibrium"
+            },
+
+            "Demand increase (income rise)": {
+                "demand": 4,
+                "supply": 0,
+                "explanation": "Higher income increases demand → Demand shifts RIGHT"
+            },
+
+            "Demand decrease (pandemic)": {
+                "demand": -5,
+                "supply": 0,
+                "explanation": "Pandemic reduces consumption → Demand shifts LEFT"
+            },
+
+            "Supply increase (technology)": {
+                "demand": 0,
+                "supply": 4,
+                "explanation": "Technology reduces cost → Supply shifts RIGHT (DOWN)"
+            },
+
+            "Supply decrease (war)": {
+                "demand": 0,
+                "supply": -4,
+                "explanation": "War increases cost → Supply shifts LEFT (UP)"
+            },
+
+            "Supply increase (subsidy)": {
+                "demand": 0,
+                "supply": 3,
+                "explanation": "Subsidy reduces cost → Supply shifts RIGHT"
+            },
+
+            "Supply decrease (tax)": {
+                "demand": 0,
+                "supply": -3,
+                "explanation": "Tax increases cost → Supply shifts LEFT"
+            }
+
+        }
+
+        PRICE_UP = "Price increases"
+        PRICE_DOWN = "Price decreases"
+
+        Q_UP = "Quantity increases"
+        Q_DOWN = "Quantity decreases"
+
+
     else:
 
         TITLE = "محاكي العرض والطلب التفاعلي"
@@ -25,104 +78,93 @@ def run(lang="English"):
         RESULT_TITLE = "نتيجة السوق"
         EQUILIBRIUM_TITLE = "التوازن"
 
-    st.title(TITLE)
+        SCENARIOS = {
+
+            "لا توجد صدمة": {
+                "demand": 0,
+                "supply": 0,
+                "explanation": "السوق في حالة توازن أولي"
+            },
+
+            "زيادة الطلب (ارتفاع الدخل)": {
+                "demand": 4,
+                "supply": 0,
+                "explanation": "ارتفاع الدخل يزيد الطلب → انتقال منحنى الطلب إلى اليمين"
+            },
+
+            "انخفاض الطلب (جائحة)": {
+                "demand": -5,
+                "supply": 0,
+                "explanation": "الجائحة تقلل الاستهلاك → انتقال منحنى الطلب إلى اليسار"
+            },
+
+            "زيادة العرض (تكنولوجيا)": {
+                "demand": 0,
+                "supply": 4,
+                "explanation": "التكنولوجيا تقلل التكلفة → انتقال منحنى العرض إلى اليمين (إلى الأسفل)"
+            },
+
+            "انخفاض العرض (حرب)": {
+                "demand": 0,
+                "supply": -4,
+                "explanation": "الحرب تزيد التكلفة → انتقال منحنى العرض إلى اليسار (إلى الأعلى)"
+            },
+
+            "زيادة العرض (دعم حكومي)": {
+                "demand": 0,
+                "supply": 3,
+                "explanation": "الدعم يقلل التكلفة → انتقال منحنى العرض إلى اليمين"
+            },
+
+            "انخفاض العرض (ضريبة)": {
+                "demand": 0,
+                "supply": -3,
+                "explanation": "الضريبة تزيد التكلفة → انتقال منحنى العرض إلى اليسار"
+            }
+
+        }
+
+        PRICE_UP = "السعر يرتفع"
+        PRICE_DOWN = "السعر ينخفض"
+
+        Q_UP = "الكمية ترتفع"
+        Q_DOWN = "الكمية تنخفض"
 
     # =========================
-    # BASE MARKET
+    # UI
+    # =========================
+
+    st.title(TITLE)
+
+    scenario_name = st.selectbox(
+        SCENARIO_LABEL,
+        list(SCENARIOS.keys())
+    )
+
+    demand_shift = SCENARIOS[scenario_name]["demand"]
+    supply_shift = SCENARIOS[scenario_name]["supply"]
+
+    explanation = SCENARIOS[scenario_name]["explanation"]
+
+    # =========================
+    # BASE CURVES
     # =========================
 
     P = np.linspace(0, 20, 200)
 
-    # Demand: Qd = a − bP
     a = 16
     b = 0.6
-
-    # Supply: Qs = c + dP
     c = 2
     d = 0.5
 
     Qd = a - b * P
     Qs = c + d * P
 
-    # =========================
-    # SCENARIOS
-    # =========================
-
-    scenario = st.selectbox(
-
-        SCENARIO_LABEL,
-
-        [
-
-            "No shock",
-
-            "Demand increase (income rise)",
-
-            "Demand decrease (pandemic)",
-
-            "Supply increase (technology)",
-
-            "Supply decrease (war)",
-
-            "Supply increase (subsidy)",
-
-            "Supply decrease (tax)"
-
-        ]
-
-    )
-
-    demand_shift = 0
-    supply_shift = 0
-    explanation = ""
-
-    # Demand shocks
-    if scenario == "Demand increase (income rise)":
-
-        demand_shift = 4
-
-        explanation = "Higher income increases demand → demand curve shifts RIGHT"
-
-    elif scenario == "Demand decrease (pandemic)":
-
-        demand_shift = -5
-
-        explanation = "Pandemic reduces consumption → demand shifts LEFT"
-
-    # Supply shocks
-    elif scenario == "Supply increase (technology)":
-
-        supply_shift = 4
-
-        explanation = "Technology reduces cost → supply shifts RIGHT (DOWN)"
-
-    elif scenario == "Supply decrease (war)":
-
-        supply_shift = -4
-
-        explanation = "War increases cost → supply shifts LEFT (UP)"
-
-    elif scenario == "Supply increase (subsidy)":
-
-        supply_shift = 3
-
-        explanation = "Subsidy reduces cost → supply shifts RIGHT"
-
-    elif scenario == "Supply decrease (tax)":
-
-        supply_shift = -3
-
-        explanation = "Tax increases cost → supply shifts LEFT"
-
-    # =========================
-    # NEW CURVES
-    # =========================
-
     Qd_new = (a + demand_shift) - b * P
     Qs_new = (c + supply_shift) + d * P
 
     # =========================
-    # EQUILIBRIUM
+    # EQUILIBRIUM FUNCTION
     # =========================
 
     def equilibrium(a, b, c, d):
@@ -147,96 +189,38 @@ def run(lang="English"):
 
     fig = go.Figure()
 
-    # Original curves
-    fig.add_trace(go.Scatter(
+    fig.add_trace(go.Scatter(x=Qd, y=P, name="Demand"))
+    fig.add_trace(go.Scatter(x=Qs, y=P, name="Supply"))
 
-        x=Qd,
-        y=P,
-        name="Original Demand",
-        line=dict(width=4)
-
-    ))
-
-    fig.add_trace(go.Scatter(
-
-        x=Qs,
-        y=P,
-        name="Original Supply",
-        line=dict(width=4)
-
-    ))
-
-    # New curves
     if demand_shift != 0:
-
         fig.add_trace(go.Scatter(
-
-            x=Qd_new,
-            y=P,
+            x=Qd_new, y=P,
             name="New Demand",
-            line=dict(dash="dash", width=4)
-
+            line=dict(dash="dash")
         ))
 
     if supply_shift != 0:
-
         fig.add_trace(go.Scatter(
-
-            x=Qs_new,
-            y=P,
+            x=Qs_new, y=P,
             name="New Supply",
-            line=dict(dash="dash", width=4)
-
+            line=dict(dash="dash")
         ))
-
-    # Equilibrium points
 
     fig.add_trace(go.Scatter(
-
-        x=[Qe],
-        y=[Pe],
+        x=[Qe], y=[Pe],
         mode="markers",
-        marker=dict(size=12),
         name="Original Equilibrium"
-
     ))
 
-    if scenario != "No shock":
-
-        fig.add_trace(go.Scatter(
-
-            x=[Qe_new],
-            y=[Pe_new],
-            mode="markers",
-            marker=dict(size=12),
-            name="New Equilibrium"
-
-        ))
-
-    # Arrow showing shift
-
-    if scenario != "No shock":
-
-        fig.add_annotation(
-
-            x=Qe_new,
-            y=Pe_new,
-            ax=Qe,
-            ay=Pe,
-            showarrow=True,
-            arrowhead=3,
-            arrowsize=2,
-            arrowwidth=2
-
-        )
+    fig.add_trace(go.Scatter(
+        x=[Qe_new], y=[Pe_new],
+        mode="markers",
+        name="New Equilibrium"
+    ))
 
     fig.update_layout(
-
         xaxis_title="Quantity",
-        yaxis_title="Price",
-        template="simple_white",
-        height=600
-
+        yaxis_title="Price"
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -256,33 +240,19 @@ def run(lang="English"):
     col2.metric("New Quantity", round(Qe_new, 2))
 
     # =========================
-    # EXPLANATION BOX
+    # EXPLANATION
     # =========================
 
     st.subheader(EXPLANATION_TITLE)
-
     st.info(explanation)
 
     # =========================
-    # RESULT INTERPRETATION
+    # RESULT
     # =========================
 
     st.subheader(RESULT_TITLE)
 
-    if Pe_new > Pe:
+    price_result = PRICE_UP if Pe_new > Pe else PRICE_DOWN
+    quantity_result = Q_UP if Qe_new > Qe else Q_DOWN
 
-        price_result = "Price increases"
-
-    else:
-
-        price_result = "Price decreases"
-
-    if Qe_new > Qe:
-
-        quantity_result = "Quantity increases"
-
-    else:
-
-        quantity_result = "Quantity decreases"
-
-    st.success(f"{price_result} and {quantity_result}")
+    st.success(f"{price_result} ، {quantity_result}")
