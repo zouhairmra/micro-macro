@@ -1,244 +1,173 @@
 import streamlit as st
 import numpy as np
-import plotly.graph_objects as go
-
-# =====================================================
-# BASE MARKET (FIXED)
-# =====================================================
-
-BASE_DEMAND = 120
-BASE_SUPPLY = 20
-SLOPE = 2
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyArrowPatch
 
 
-# =====================================================
-# SHIFT VALUES (different magnitude)
-# =====================================================
+def app():
 
-DEMAND_SHIFTS = {
-    "No change": 0,
-    "Income increase": 25,
-    "Income decrease": -18,
-    "Population increase": 30,
-    "Population decrease": -22,
-    "Price of substitute increases": 15,
-    "Price of complement increases": -12,
-    "Pandemic (restaurants closed)": -35,
-}
+    st.title("Demand and Supply Simulator")
 
-SUPPLY_SHIFTS = {
-    "No change": 0,
-    "Technology improvement": 28,
-    "Input cost increase": -26,
-    "Government subsidy": 20,
-    "New firms enter market": 18,
-    "Tax increase": -22,
-}
+    st.markdown("Visualize how demand and supply curves shift under different scenarios.")
 
+    # -----------------------
+    # Base parameters
+    # -----------------------
 
-# =====================================================
-# EXPLANATIONS
-# =====================================================
+    P = np.linspace(0, 20, 200)
 
-DEMAND_EXPLANATION = {
-    "Income increase": "Demand shifts RIGHT because consumers can buy more.",
-    "Income decrease": "Demand shifts LEFT because consumers have less purchasing power.",
-    "Population increase": "Demand shifts RIGHT because there are more buyers.",
-    "Population decrease": "Demand shifts LEFT because there are fewer buyers.",
-    "Price of substitute increases": "Demand shifts RIGHT because substitute becomes expensive.",
-    "Price of complement increases": "Demand shifts LEFT because complement becomes expensive.",
-    "Pandemic (restaurants closed)": "Demand shifts LEFT due to economic shutdown.",
-    "No change": "Demand curve does not shift."
-}
+    # Demand: Qd = a - bP
+    a = 16
+    b = 0.6
 
-SUPPLY_EXPLANATION = {
-    "Technology improvement": "Supply shifts RIGHT because production becomes cheaper.",
-    "Input cost increase": "Supply shifts LEFT because production becomes more expensive.",
-    "Government subsidy": "Supply shifts RIGHT because producers receive financial support.",
-    "New firms enter market": "Supply shifts RIGHT because more producers exist.",
-    "Tax increase": "Supply shifts LEFT because producers face higher costs.",
-    "No change": "Supply curve does not shift."
-}
+    # Supply: Qs = c + dP
+    c = 2
+    d = 0.5
 
+    Qd = a - b * P
+    Qs = c + d * P
 
-# =====================================================
-# MAIN FUNCTION
-# =====================================================
+    # -----------------------
+    # Scenario selection
+    # -----------------------
 
-def run(lang="English"):
-
-    st.header("Demand & Supply Simulator")
-
-    # =================================================
-    # MODE SELECTION
-    # =================================================
-
-    mode = st.radio(
-        "Select simulation mode:",
+    scenario = st.selectbox(
+        "Select scenario",
         [
-            "1. Demand shift (Supply constant)",
-            "2. Supply shift (Demand constant)"
+            "No shock",
+            "Increase in demand (income rise)",
+            "Decrease in demand (pandemic)",
+            "Increase in supply (technology improvement)",
+            "Decrease in supply (war / cost increase)",
+            "Supply increase (subsidy)"
         ]
     )
 
-    prices = np.linspace(0, 100, 200)
+    # -----------------------
+    # Shift values (different magnitudes)
+    # -----------------------
 
-    original_demand = BASE_DEMAND - SLOPE * prices
-    original_supply = BASE_SUPPLY + SLOPE * prices
+    demand_shift = 0
+    supply_shift = 0
+    explanation = ""
 
+    if scenario == "Increase in demand (income rise)":
+        demand_shift = 3.0
+        explanation = "Income rise increases demand. Demand curve shifts RIGHT."
 
-    # =================================================
-    # DEMAND SHIFT MODE
-    # =================================================
+    elif scenario == "Decrease in demand (pandemic)":
+        demand_shift = -4.0
+        explanation = "Pandemic reduces demand. Demand curve shifts LEFT."
 
-    if mode.startswith("1"):
+    elif scenario == "Increase in supply (technology improvement)":
+        supply_shift = 3.5
+        explanation = "Technology improvement increases supply. Supply curve shifts RIGHT and DOWN."
 
-        factor = st.selectbox(
-            "Select demand factor:",
-            list(DEMAND_SHIFTS.keys())
-        )
+    elif scenario == "Decrease in supply (war / cost increase)":
+        supply_shift = -3.0
+        explanation = "War increases costs. Supply curve shifts LEFT and UP."
 
-        shift = DEMAND_SHIFTS[factor]
-
-        new_demand_intercept = BASE_DEMAND + shift
-
-        new_demand = new_demand_intercept - SLOPE * prices
-        new_supply = original_supply
-
-
-        # equilibrium
-        eq_price = (new_demand_intercept - BASE_SUPPLY) / (2 * SLOPE)
-        eq_quantity = new_demand_intercept - SLOPE * eq_price
-
-
-        # =================================================
-        # EXPLANATION BOX
-        # =================================================
-
-        st.info(DEMAND_EXPLANATION[factor])
-
-        direction = "RIGHT ➜" if shift > 0 else "LEFT ⬅"
-
-
-        # =================================================
-        # GRAPH
-        # =================================================
-
-        fig = go.Figure()
-
-        # original curves (thin dashed)
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=original_demand,
-            name="Original Demand",
-            line=dict(dash="dash", width=2, color="blue")
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=original_supply,
-            name="Supply (constant)",
-            line=dict(width=3, color="red")
-        ))
-
-        # new demand curve (thick)
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=new_demand,
-            name="New Demand",
-            line=dict(width=4, color="green")
-        ))
-
-
-        # arrow annotation
-        fig.add_annotation(
-            x=60,
-            y=new_demand_intercept,
-            text=f"Demand shifts {direction}",
-            showarrow=True,
-            arrowhead=3,
-            font=dict(size=16, color="green")
-        )
-
-
-    # =================================================
-    # SUPPLY SHIFT MODE
-    # =================================================
+    elif scenario == "Supply increase (subsidy)":
+        supply_shift = 2.0
+        explanation = "Subsidy reduces costs. Supply curve shifts RIGHT and DOWN."
 
     else:
+        explanation = "No shock. Curves remain unchanged."
 
-        factor = st.selectbox(
-            "Select supply factor:",
-            list(SUPPLY_SHIFTS.keys())
+    # -----------------------
+    # Apply shifts
+    # -----------------------
+
+    Qd_new = (a + demand_shift) - b * P
+    Qs_new = (c + supply_shift) + d * P
+
+    # -----------------------
+    # Plot
+    # -----------------------
+
+    fig, ax = plt.subplots()
+
+    # Original curves
+    ax.plot(Qd, P, linewidth=3, label="Original Demand")
+    ax.plot(Qs, P, linewidth=3, label="Original Supply")
+
+    # New curves
+    if demand_shift != 0:
+        ax.plot(Qd_new, P, linestyle="--", linewidth=3, label="New Demand")
+
+    if supply_shift != 0:
+        ax.plot(Qs_new, P, linestyle="--", linewidth=3, label="New Supply")
+
+    # -----------------------
+    # Arrows
+    # -----------------------
+
+    if demand_shift > 0:
+        arrow = FancyArrowPatch(
+            (Qd[100], P[100]),
+            (Qd_new[100], P[100]),
+            arrowstyle="->",
+            mutation_scale=20
         )
+        ax.add_patch(arrow)
 
-        shift = SUPPLY_SHIFTS[factor]
-
-        new_supply_intercept = BASE_SUPPLY + shift
-
-        new_supply = new_supply_intercept + SLOPE * prices
-        new_demand = original_demand
-
-
-        eq_price = (BASE_DEMAND - new_supply_intercept) / (2 * SLOPE)
-        eq_quantity = BASE_DEMAND - SLOPE * eq_price
-
-
-        st.info(SUPPLY_EXPLANATION[factor])
-
-        direction = "RIGHT ➜" if shift > 0 else "LEFT ⬅"
-
-
-        fig = go.Figure()
-
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=original_supply,
-            name="Original Supply",
-            line=dict(dash="dash", width=2, color="red")
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=original_demand,
-            name="Demand (constant)",
-            line=dict(width=3, color="blue")
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=prices,
-            y=new_supply,
-            name="New Supply",
-            line=dict(width=4, color="green")
-        ))
-
-        fig.add_annotation(
-            x=60,
-            y=new_supply_intercept,
-            text=f"Supply shifts {direction}",
-            showarrow=True,
-            arrowhead=3,
-            font=dict(size=16, color="green")
+    if demand_shift < 0:
+        arrow = FancyArrowPatch(
+            (Qd[100], P[100]),
+            (Qd_new[100], P[100]),
+            arrowstyle="->",
+            mutation_scale=20
         )
+        ax.add_patch(arrow)
 
+    if supply_shift > 0:
+        arrow = FancyArrowPatch(
+            (Qs[100], P[100]),
+            (Qs_new[100], P[100]),
+            arrowstyle="->",
+            mutation_scale=20
+        )
+        ax.add_patch(arrow)
 
-    # =================================================
-    # EQUILIBRIUM DISPLAY
-    # =================================================
+    if supply_shift < 0:
+        arrow = FancyArrowPatch(
+            (Qs[100], P[100]),
+            (Qs_new[100], P[100]),
+            arrowstyle="->",
+            mutation_scale=20
+        )
+        ax.add_patch(arrow)
 
-    st.success(f"New Equilibrium Price: {eq_price:.2f}")
-    st.success(f"New Equilibrium Quantity: {eq_quantity:.2f}")
+    # -----------------------
+    # Labels
+    # -----------------------
 
+    ax.set_xlabel("Quantity")
+    ax.set_ylabel("Price")
+    ax.set_title("Demand and Supply Shift Simulation")
+    ax.legend()
+    ax.grid(True)
 
-    # =================================================
-    # FINAL GRAPH SETTINGS
-    # =================================================
+    st.pyplot(fig)
 
-    fig.update_layout(
-        title="Market Shock Simulation",
-        xaxis_title="Price",
-        yaxis_title="Quantity",
-        legend=dict(font=dict(size=14))
-    )
+    # -----------------------
+    # Explanation box
+    # -----------------------
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.info(explanation)
+
+    # -----------------------
+    # Economic interpretation
+    # -----------------------
+
+    if demand_shift > 0:
+        st.success("Result: Price increases and Quantity increases.")
+
+    elif demand_shift < 0:
+        st.warning("Result: Price decreases and Quantity decreases.")
+
+    elif supply_shift > 0:
+        st.success("Result: Price decreases and Quantity increases.")
+
+    elif supply_shift < 0:
+        st.warning("Result: Price increases and Quantity decreases.")
