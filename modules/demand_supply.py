@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def app():
+def run(lang="English"):
 
     st.title("Demand and Supply Simulator")
 
