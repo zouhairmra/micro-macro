@@ -32,7 +32,6 @@ SUPPLY_SHIFTS = {
     "Input cost increase": -26,
     "Government subsidy": 20,
     "New firms enter market": 18,
-    "War (energy cost shock)": -40,
     "Tax increase": -22,
 }
 
@@ -57,7 +56,6 @@ SUPPLY_EXPLANATION = {
     "Input cost increase": "Supply shifts LEFT because production becomes more expensive.",
     "Government subsidy": "Supply shifts RIGHT because producers receive financial support.",
     "New firms enter market": "Supply shifts RIGHT because more producers exist.",
-    "War (energy cost shock)": "Supply shifts LEFT because production costs increase sharply.",
     "Tax increase": "Supply shifts LEFT because producers face higher costs.",
     "No change": "Supply curve does not shift."
 }
