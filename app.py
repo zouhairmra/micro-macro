@@ -1,6 +1,6 @@
 # ================================================= 
 # ECONOMICS PLATFORM — MAIN APP
-# With AI Chatbot Integration
+# With AI Chatbot Integrated Directly
 # =================================================
 
 import streamlit as st
@@ -10,7 +10,7 @@ import pandas as pd
 
 # Modules
 from config import get_text
-from modules import demand_supply, elasticity, quiz, competition, teacher_panel, chatbot,
+from modules import demand_supply, elasticity, quiz, competition, teacher_panel
 
 # =================================================
 # PAGE CONFIG
@@ -56,7 +56,7 @@ pages = {
     get_text("teacher_panel", lang): teacher_panel,
 }
 
-# Chatbot page
+# Chatbot page name
 chatbot_page_name = "Chatbot" if lang == "English" else "المساعد"
 page_options = list(pages.keys()) + [chatbot_page_name]
 
@@ -84,12 +84,13 @@ else:
         else "اسأل أي شيء عن الاقتصاد أو نتائجك"
     )
 
-    # API Key input
+    # Poe API Key input (optional)
     POE_API_KEY = st.text_input(
         "Enter your Poe API Key (optional)" if lang == "English" else "أدخل مفتاح Poe (اختياري)",
         type="password"
     )
 
+    # User input
     user_input = st.text_input(
         "Type your question..." if lang == "English" else "اكتب سؤالك هنا..."
     )
