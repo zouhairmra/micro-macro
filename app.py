@@ -56,7 +56,7 @@ pages = {
     get_text("teacher_panel", lang): teacher_panel,
 }
 
-# Add chatbot as a separate option in sidebar
+# Chatbot page
 chatbot_page_name = "Chatbot" if lang == "English" else "المساعد"
 page_options = list(pages.keys()) + [chatbot_page_name]
 
@@ -84,7 +84,12 @@ else:
         else "اسأل أي شيء عن الاقتصاد أو نتائجك"
     )
 
-    # User input
+    # API Key input
+    POE_API_KEY = st.text_input(
+        "Enter your Poe API Key (optional)" if lang == "English" else "أدخل مفتاح Poe (اختياري)",
+        type="password"
+    )
+
     user_input = st.text_input(
         "Type your question..." if lang == "English" else "اكتب سؤالك هنا..."
     )
@@ -92,28 +97,32 @@ else:
     if user_input:
         st.session_state["chat_messages"].append({"role": "user", "content": user_input})
 
-        with st.spinner("Generating response..."):
-            try:
-                # ==========================
-                # Replace with your Poe API key & endpoint
-                # ==========================
-                POE_API_URL = "https://api.poe.com/v1/chat/completions"
-                POE_API_KEY = st.secrets.get("POE_API_KEY", "YOUR_POE_API_KEY_HERE")
-                MODEL = "gpt-4o-mini"  # or another supported model
+        with st.spinner("Generating response..." if lang == "English" else "جاري إنشاء الرد..."):
+            if POE_API_KEY:
+                try:
+                    POE_API_URL = "https://api.poe.com/v1/chat/completions"
+                    MODEL = "gpt-4o-mini"
 
-                headers = {"Authorization": f"Bearer {POE_API_KEY}", "Content-Type": "application/json"}
-                payload = {
-                    "model": MODEL,
-                    "messages": [{"role": msg["role"], "content": msg["content"]} for msg in st.session_state["chat_messages"]]
-                }
+                    headers = {
+                        "Authorization": f"Bearer {POE_API_KEY}",
+                        "Content-Type": "application/json"
+                    }
+                    payload = {
+                        "model": MODEL,
+                        "messages": [{"role": msg["role"], "content": msg["content"]} for msg in st.session_state["chat_messages"]]
+                    }
 
-                res = requests.post(POE_API_URL, headers=headers, json=payload, timeout=60)
-                res.raise_for_status()
-                data = res.json()
-                assistant_response = data["choices"][0]["message"]["content"]
+                    res = requests.post(POE_API_URL, headers=headers, json=payload, timeout=60)
+                    res.raise_for_status()
+                    data = res.json()
+                    assistant_response = data["choices"][0]["message"]["content"]
 
-            except Exception as e:
-                assistant_response = f"Error fetching response: {e}"
+                except Exception as e:
+                    assistant_response = f"Error fetching response: {e}"
+
+            else:
+                assistant_response = "Please enter a Poe API key to get AI responses." \
+                    if lang == "English" else "الرجاء إدخال مفتاح Poe للحصول على ردود الذكاء الاصطناعي."
 
         st.session_state["chat_messages"].append({"role": "assistant", "content": assistant_response})
 
@@ -122,10 +131,10 @@ else:
         role = "User" if msg["role"] == "user" else "Assistant"
         st.markdown(f"**{role}:** {msg['content']}")
 
-    # Clear chat
-    if st.button("🧹 Clear Chat"):
+    # Clear chat button
+    if st.button("🧹 Clear Chat" if lang == "English" else "مسح المحادثة"):
         st.session_state["chat_messages"] = []
-        st.toast("Chat cleared!")
+        st.success("Chat cleared!" if lang == "English" else "تم مسح المحادثة!")
 
 # =================================================
 # FOOTER
