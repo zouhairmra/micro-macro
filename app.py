@@ -1,22 +1,59 @@
+# =================================================
+# ECONOMICS PLATFORM — MAIN APP
+# Clean Professional Version with AI Assistant
+# =================================================
+
 import streamlit as st
+import time
+
+# Modules
 from config import get_text
 from modules import demand_supply, elasticity, quiz, competition, teacher_panel, chatbot
-from openai import OpenAI
-import time
+
+# Optional OpenAI
+try:
+    from openai import OpenAI
+except:
+    OpenAI = None
+
 
 # =================================================
 # PAGE CONFIG
 # =================================================
-st.set_page_config(page_title="Economics Platform", layout="wide")
+
+st.set_page_config(
+    page_title="Economics Platform",
+    layout="wide"
+)
+
+
+# =================================================
+# SESSION STATE INITIALIZATION
+# =================================================
+
+if "economic_data" not in st.session_state:
+    st.session_state["economic_data"] = {}
+
+if "competition_active" not in st.session_state:
+    st.session_state["competition_active"] = False
+
 
 # =================================================
 # LANGUAGE SELECTION
 # =================================================
-lang = st.sidebar.selectbox("Language", ["English", "العربية"])
+
+lang = st.sidebar.selectbox(
+    "Language",
+    ["English", "العربية"]
+)
+
 
 # =================================================
-# AI ASSISTANT SETTINGS
+# AI SETTINGS (OPTIONAL)
 # =================================================
+
+st.sidebar.markdown("---")
+
 st.sidebar.subheader(
     "AI Economics Assistant"
     if lang == "English"
@@ -24,27 +61,41 @@ st.sidebar.subheader(
 )
 
 api_key = st.sidebar.text_input(
-    "Enter OpenAI API Key"
+    "Enter OpenAI API Key (optional)"
     if lang == "English"
-    else "أدخل مفتاح OpenAI",
+    else "أدخل مفتاح OpenAI (اختياري)",
     type="password"
 )
 
-ai_enabled = api_key != ""
+ai_enabled = False
+client = None
 
-if ai_enabled:
-    client = OpenAI(api_key=api_key)
+if api_key and OpenAI:
+    try:
+        client = OpenAI(api_key=api_key)
+        ai_enabled = True
+    except:
+        ai_enabled = False
+
 
 # =================================================
 # PAGE NAVIGATION
 # =================================================
+
 pages = {
+
     get_text("demand_supply", lang): demand_supply,
+
     get_text("elasticity", lang): elasticity,
+
     get_text("quiz", lang): quiz,
+
     get_text("competition", lang): competition,
+
     get_text("teacher_panel", lang): teacher_panel,
+
     get_text("chatbot", lang): chatbot
+
 }
 
 page_choice = st.sidebar.radio(
@@ -52,152 +103,176 @@ page_choice = st.sidebar.radio(
     list(pages.keys())
 )
 
+
 # =================================================
 # RUN SELECTED MODULE
 # =================================================
+
 pages[page_choice].run(lang)
 
+
 # =================================================
-# GLOBAL AI ECONOMICS ASSISTANT
+# INTELLIGENT AI ECONOMICS ASSISTANT
 # =================================================
+
 st.markdown("---")
 
 st.header(
-    "AI Economics Assistant"
+    "Intelligent Economics AI Tutor"
     if lang == "English"
-    else "المساعد الاقتصادي الذكي"
+    else "المعلم الاقتصادي الذكي"
+)
+
+st.write(
+    "Analyze elasticity, equilibrium, revenue, and market results."
+    if lang == "English"
+    else "تحليل المرونة والتوازن والإيرادات ونتائج السوق."
 )
 
 student_question = st.text_area(
-    "Ask about elasticity, equilibrium, demand, supply, revenue, GDP, inflation..."
+
+    "Ask about YOUR results or economics concepts:"
     if lang == "English"
-    else "اسأل عن المرونة أو التوازن أو الطلب أو العرض أو الناتج المحلي..."
+    else "اسأل عن نتائجك أو مفاهيم الاقتصاد:"
+
 )
 
+
 if st.button(
-    "Analyze"
+
+    "Analyze Economic Situation"
     if lang == "English"
-    else "تحليل"
+    else "تحليل الوضع الاقتصادي"
+
 ):
 
-    if student_question.strip() == "":
-        st.warning(
-            "Please enter a question"
-            if lang == "English"
-            else "يرجى إدخال سؤال"
-        )
+    econ = st.session_state.get("economic_data", {})
 
-    else:
+    price = econ.get("price", None)
+    quantity = econ.get("quantity", None)
+    elasticity_val = econ.get("elasticity", None)
+    revenue = econ.get("revenue", None)
+    intercept = econ.get("intercept", None)
+    slope = econ.get("slope", None)
 
-        # =====================================
-        # GET ECONOMIC VARIABLES SAFELY
-        # =====================================
+    context = f"""
+Student Data:
 
-        a_val = globals().get("a", None)
-        b_val = globals().get("b", None)
-        P_val = globals().get("P", None)
-        Q_val = globals().get("Q", None)
-        elasticity_val = globals().get("elasticity", None)
+Price: {price}
+Quantity: {quantity}
+Elasticity: {elasticity_val}
+Revenue: {revenue}
+Demand intercept: {intercept}
+Demand slope: {slope}
 
-        context = f"""
-        Economic simulation data:
-
-        Demand intercept (a): {a_val}
-        Demand slope (b): {b_val}
-        Price: {P_val}
-        Quantity: {Q_val}
-        Elasticity: {elasticity_val}
-
-        Student question:
-        {student_question}
-        """
-
-        # =====================================
-        # USE OPENAI IF AVAILABLE
-        # =====================================
-
-        if ai_enabled:
-
-            try:
-
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": """
-You are an expert economics professor.
-Explain clearly using microeconomics and macroeconomics theory.
-Use elasticity, equilibrium, revenue, GDP, inflation when relevant.
+Question:
+{student_question}
 """
-                        },
-                        {
-                            "role": "user",
-                            "content": context
-                        }
-                    ],
-                    temperature=0.3
-                )
 
-                answer = response.choices[0].message.content
 
-                st.success(answer)
+    # =================================================
+    # OPENAI VERSION
+    # =================================================
 
-            except Exception as e:
+    if ai_enabled:
 
-                st.error(f"AI Error: {e}")
+        try:
 
-        # =====================================
-        # OFFLINE FALLBACK AI
-        # =====================================
+            response = client.chat.completions.create(
 
-        else:
+                model="gpt-4o-mini",
 
-            question_lower = student_question.lower()
+                messages=[
 
-            if "elasticity" in question_lower:
+                    {
+                        "role": "system",
+                        "content": """
+You are an expert economics professor.
 
-                st.success("""
-Elasticity measures responsiveness of quantity demanded to price changes.
+Explain elasticity, equilibrium, and revenue clearly.
 
-Elastic (>1): very sensitive  
-Inelastic (<1): not sensitive  
-Unit (=1): proportional change
+Give managerial advice.
+"""
+                    },
+
+                    {
+                        "role": "user",
+                        "content": context
+                    }
+
+                ],
+
+                temperature=0.2,
+
+                max_tokens=400
+
+            )
+
+            answer = response.choices[0].message.content
+
+            st.success(answer)
+
+
+        except Exception as e:
+
+            st.warning(
+                "API quota exceeded. Using internal AI engine instead."
+                if lang == "English"
+                else "تم تجاوز الحصة. استخدام الذكاء الداخلي."
+            )
+
+            ai_enabled = False
+
+
+    # =================================================
+    # INTERNAL ECONOMIC AI ENGINE (ALWAYS AVAILABLE)
+    # =================================================
+
+    if not ai_enabled:
+
+        if elasticity_val is not None:
+
+            if elasticity_val > 1:
+
+                st.success(f"""
+
+Elasticity = {elasticity_val:.2f} → ELASTIC DEMAND
+
+Managerial Recommendation:
+
+• Lower price to increase total revenue  
+• Consumers are price sensitive  
+
 """)
 
-            elif "equilibrium" in question_lower:
+            elif elasticity_val < 1:
 
-                st.success("""
-Equilibrium occurs where demand equals supply.
+                st.success(f"""
 
-At equilibrium:
-• No shortage
-• No surplus
-• Market is stable
-""")
+Elasticity = {elasticity_val:.2f} → INELASTIC DEMAND
 
-            elif "demand" in question_lower:
+Managerial Recommendation:
 
-                st.success("""
-Law of demand:
-When price increases, quantity demanded decreases.
-""")
+• Increase price to increase revenue  
+• Consumers are less sensitive  
 
-            elif "supply" in question_lower:
-
-                st.success("""
-Law of supply:
-When price increases, quantity supplied increases.
 """)
 
             else:
 
                 st.success("""
-This question relates to economic analysis.
 
-Consider:
-• elasticity
-• equilibrium
-• marginal analysis
-• market structure
+Unit Elastic Demand
+
+Revenue is maximized at this point.
+
 """)
+
+
+        else:
+
+            st.info(
+
+                "Run Elasticity or Demand-Supply module first."
+                if lang == "English"
+                else "قم بتشغيل وحدة المرونة أو العرض والطلب أولا
