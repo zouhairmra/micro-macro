@@ -54,19 +54,23 @@ pages = {
     get_text("quiz", lang): quiz,
     get_text("competition", lang): competition,
     get_text("teacher_panel", lang): teacher_panel,
-    "Chatbot" if lang == "English" else "المساعد": None  # Chatbot handled in app.py
 }
+
+# Add chatbot as a separate option in sidebar
+chatbot_page_name = "Chatbot" if lang == "English" else "المساعد"
+page_options = list(pages.keys()) + [chatbot_page_name]
 
 page_choice = st.sidebar.radio(
     get_text("navigation", lang),
-    list(pages.keys())
+    page_options
 )
 
 # =================================================
-# RUN SELECTED MODULE
+# RUN SELECTED MODULE OR CHATBOT
 # =================================================
 
-if page_choice != ("Chatbot" if lang == "English" else "المساعد"):
+if page_choice in pages:
+    # Run normal module
     pages[page_choice].run(lang)
 
 else:
