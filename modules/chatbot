@@ -1,7 +1,0 @@
-import streamlit as st
-
-def run(lang="English"):
-    st.header("🤖 Economics Chatbot" if lang=="English" else "🤖 المساعد الاقتصادي الذكي")
-    st.write(
-        "This is a placeholder chatbot page." if lang=="English" else "هذه صفحة المساعد الذكي."
-    )
