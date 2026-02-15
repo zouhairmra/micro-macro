@@ -92,59 +92,74 @@ if st.button(
     else:
 
         # FULL ECONOMIC CONTEXT FROM SIMULATION
-       # SAFE VARIABLE EXTRACTION
+       # ===============================
+# AI ECONOMICS ASSISTANT
+# ===============================
 
-a_val = globals().get("a", "Not defined")
-b_val = globals().get("b_el", "Not defined")
-eq_price_val = globals().get("eq_price", "Not defined")
-eq_quantity_val = globals().get("eq_quantity", "Not defined")
-price_val = globals().get("price", "Not defined")
-Qd_val_safe = globals().get("Qd_val", "Not defined")
-Qs_val_safe = globals().get("Qs_val", "Not defined")
-market_status_val = globals().get("market_status", "Not defined")
+st.markdown("---")
+st.header("AI Economics Assistant")
 
-elasticity_val = globals().get("elasticity", "Not defined")
-elasticity_type_val = globals().get("elasticity_type", "Not defined")
-TR1_val = globals().get("TR1", "Not defined")
-TR2_val = globals().get("TR2", "Not defined")
+user_question = st.text_area(
+    "Ask any question about elasticity, microeconomics, macroeconomics, or your results:"
+)
 
-cross_elasticity_val = globals().get("cross_elasticity", "Not defined")
-cross_type_val = globals().get("cross_type", "Not defined")
+if st.button("Ask AI Assistant"):
 
-income_elasticity_val = globals().get("income_elasticity", "Not defined")
-income_type_val = globals().get("income_type", "Not defined")
+    if user_question.strip() == "":
+        st.warning("Please enter a question.")
+    else:
 
-economic_context = f"""
-MARKET DATA
-------------------
-Demand intercept (a): {a_val}
-Demand slope (b): {b_val}
+        # Safely retrieve variables if they exist
+        a_val = globals().get("a", None)
+        b_val = globals().get("b", None)
+        P_val = globals().get("P", None)
+        Q_val = globals().get("Q", None)
+        elasticity_val = globals().get("elasticity", None)
 
-Equilibrium price: {eq_price_val}
-Equilibrium quantity: {eq_quantity_val}
+        # Build economic context safely
+        context = f"""
+        Student economic model:
 
-Current price: {price_val}
+        Demand intercept (a): {a_val if a_val is not None else "Not defined"}
+        Demand slope (b): {b_val if b_val is not None else "Not defined"}
+        Price (P): {P_val if P_val is not None else "Not defined"}
+        Quantity (Q): {Q_val if Q_val is not None else "Not defined"}
+        Elasticity: {elasticity_val if elasticity_val is not None else "Not defined"}
 
-Quantity demanded: {Qd_val_safe}
-Quantity supplied: {Qs_val_safe}
+        Student question:
+        {user_question}
+        """
 
-Market status: {market_status_val}
+        # Simple built-in AI logic (no OpenAI dependency)
+        if "elasticity" in user_question.lower():
+            response = """
+Elasticity measures responsiveness of quantity demanded to price changes.
 
-ELASTICITY DATA
-------------------
-Price elasticity: {elasticity_val}
-Elasticity type: {elasticity_type_val}
+If elasticity > 1 → Elastic demand  
+If elasticity = 1 → Unit elastic  
+If elasticity < 1 → Inelastic demand  
 
-Total revenue initial: {TR1_val}
-Total revenue new: {TR2_val}
-
-CROSS ELASTICITY
-------------------
-Cross elasticity: {cross_elasticity_val}
-Relationship: {cross_type_val}
-
-INCOME ELASTICITY
-------------------
-Income elasticity: {income_elasticity_val}
-Good type: {income_type_val}
+Elastic demand means consumers are sensitive to price changes.
 """
+        elif "demand" in user_question.lower():
+            response = """
+Demand shows the relationship between price and quantity demanded.
+
+Law of demand: when price increases, quantity demanded decreases.
+"""
+        elif "supply" in user_question.lower():
+            response = """
+Supply shows the relationship between price and quantity supplied.
+
+Law of supply: when price increases, quantity supplied increases.
+"""
+        else:
+            response = f"""
+Your question: "{user_question}"
+
+Economic interpretation:
+This relates to decision-making, optimization, and market behavior.
+Consider analyzing elasticity, marginal effects, and equilibrium.
+"""
+
+        st.success(response)
