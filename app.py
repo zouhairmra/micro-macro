@@ -92,103 +92,59 @@ if st.button(
     else:
 
         # FULL ECONOMIC CONTEXT FROM SIMULATION
-        economic_context = f"""
-        MARKET DATA
-        ------------------
-        Demand intercept (a): {a}
-        Demand slope (b): {b_el}
+       # SAFE VARIABLE EXTRACTION
 
-        Equilibrium price: {eq_price}
-        Equilibrium quantity: {eq_quantity}
+a_val = globals().get("a", "Not defined")
+b_val = globals().get("b_el", "Not defined")
+eq_price_val = globals().get("eq_price", "Not defined")
+eq_quantity_val = globals().get("eq_quantity", "Not defined")
+price_val = globals().get("price", "Not defined")
+Qd_val_safe = globals().get("Qd_val", "Not defined")
+Qs_val_safe = globals().get("Qs_val", "Not defined")
+market_status_val = globals().get("market_status", "Not defined")
 
-        Current price: {price}
+elasticity_val = globals().get("elasticity", "Not defined")
+elasticity_type_val = globals().get("elasticity_type", "Not defined")
+TR1_val = globals().get("TR1", "Not defined")
+TR2_val = globals().get("TR2", "Not defined")
 
-        Quantity demanded: {Qd_val}
-        Quantity supplied: {Qs_val}
+cross_elasticity_val = globals().get("cross_elasticity", "Not defined")
+cross_type_val = globals().get("cross_type", "Not defined")
 
-        Market status: {market_status}
+income_elasticity_val = globals().get("income_elasticity", "Not defined")
+income_type_val = globals().get("income_type", "Not defined")
 
-        ELASTICITY DATA
-        ------------------
-        Initial price: {P1}
-        New price: {P2}
+economic_context = f"""
+MARKET DATA
+------------------
+Demand intercept (a): {a_val}
+Demand slope (b): {b_val}
 
-        Quantity initial: {Q1}
-        Quantity new: {Q2}
+Equilibrium price: {eq_price_val}
+Equilibrium quantity: {eq_quantity_val}
 
-        Price elasticity: {elasticity}
-        Elasticity type: {elasticity_type}
+Current price: {price_val}
 
-        Total revenue initial: {TR1}
-        Total revenue new: {TR2}
+Quantity demanded: {Qd_val_safe}
+Quantity supplied: {Qs_val_safe}
 
-        CROSS ELASTICITY
-        ------------------
-        Cross elasticity: {cross_elasticity}
-        Relationship: {cross_type}
+Market status: {market_status_val}
 
-        INCOME ELASTICITY
-        ------------------
-        Income elasticity: {income_elasticity}
-        Good type: {income_type}
-        """
+ELASTICITY DATA
+------------------
+Price elasticity: {elasticity_val}
+Elasticity type: {elasticity_type_val}
 
-        system_prompt = """
-        You are an expert economics professor and economic consultant.
+Total revenue initial: {TR1_val}
+Total revenue new: {TR2_val}
 
-        Your job is to:
+CROSS ELASTICITY
+------------------
+Cross elasticity: {cross_elasticity_val}
+Relationship: {cross_type_val}
 
-        - Analyze demand and supply
-        - Interpret elasticity
-        - Explain equilibrium
-        - Give managerial pricing recommendations
-        - Explain revenue effects
-        - Explain substitutes/complements
-        - Explain normal/inferior/luxury goods
-
-        Give clear, structured explanation suitable for university students.
-        """
-
-        user_prompt = f"""
-        Economic simulation data:
-
-        {economic_context}
-
-        Student question:
-
-        {student_question}
-
-        Provide:
-
-        1. Explanation
-        2. Economic interpretation
-        3. Managerial recommendation
-        """
-
-        with st.spinner(
-            "AI analyzing..."
-            if lang == "English"
-            else "الذكاء الاصطناعي يحلل..."
-        ):
-
-            response = client.chat.completions.create(
-
-                model="gpt-4o-mini",
-
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-
-                temperature=0.3
-            )
-
-            ai_answer = response.choices[0].message.content
-
-        st.success(
-            "AI Economic Analysis"
-            if lang == "English"
-            else "تحليل الذكاء الاصطناعي"
-        )
-
-        st.write(ai_answer)
+INCOME ELASTICITY
+------------------
+Income elasticity: {income_elasticity_val}
+Good type: {income_type_val}
+"""
