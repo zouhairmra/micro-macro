@@ -1,6 +1,6 @@
 # ================================================= 
 # ECONOMICS PLATFORM — MAIN APP
-# AI CHATBOT INTEGRATION
+# With AI Chatbot Integration
 # =================================================
 
 import streamlit as st
@@ -10,7 +10,7 @@ import pandas as pd
 
 # Modules
 from config import get_text
-from modules import demand_supply, elasticity, quiz, competition, teacher_panel, chatbot
+from modules import demand_supply, elasticity, quiz, competition, teacher_panel
 
 # =================================================
 # PAGE CONFIG
@@ -54,7 +54,7 @@ pages = {
     get_text("quiz", lang): quiz,
     get_text("competition", lang): competition,
     get_text("teacher_panel", lang): teacher_panel,
-    get_text("chatbot", lang): chatbot  # Chatbot page added
+    "Chatbot" if lang == "English" else "المساعد": None  # Chatbot handled in app.py
 }
 
 page_choice = st.sidebar.radio(
@@ -66,8 +66,7 @@ page_choice = st.sidebar.radio(
 # RUN SELECTED MODULE
 # =================================================
 
-if page_choice != get_text("chatbot", lang):
-    # Run normal module
+if page_choice != ("Chatbot" if lang == "English" else "المساعد"):
     pages[page_choice].run(lang)
 
 else:
@@ -75,7 +74,11 @@ else:
     # CHATBOT PAGE
     # ==========================
     st.header("🤖 Economics Chatbot" if lang == "English" else "🤖 المساعد الاقتصادي الذكي")
-    st.write("Ask anything about economics or your results." if lang == "English" else "اسأل أي شيء عن الاقتصاد أو نتائجك")
+    st.write(
+        "Ask anything about economics or your results."
+        if lang == "English"
+        else "اسأل أي شيء عن الاقتصاد أو نتائجك"
+    )
 
     # User input
     user_input = st.text_input(
@@ -87,10 +90,12 @@ else:
 
         with st.spinner("Generating response..."):
             try:
-                # Optional: Replace with your own API key & endpoint
+                # ==========================
+                # Replace with your Poe API key & endpoint
+                # ==========================
                 POE_API_URL = "https://api.poe.com/v1/chat/completions"
                 POE_API_KEY = st.secrets.get("POE_API_KEY", "YOUR_POE_API_KEY_HERE")
-                MODEL = "gpt-4o-mini"  # or "maztouriabot", "claude-3-haiku"
+                MODEL = "gpt-4o-mini"  # or another supported model
 
                 headers = {"Authorization": f"Bearer {POE_API_KEY}", "Content-Type": "application/json"}
                 payload = {
@@ -123,7 +128,6 @@ else:
 # =================================================
 
 st.markdown("---")
-
 st.caption(
     "Economics Learning Platform" if lang == "English" else "منصة تعلم الاقتصاد"
 )
