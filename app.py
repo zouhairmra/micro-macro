@@ -13,10 +13,10 @@ st.set_page_config(page_title="Economics Platform", layout="wide")
 # LANGUAGE SELECTION
 # =================================================
 lang = st.sidebar.selectbox("Language", ["English", "العربية"])
+
 # =================================================
 # AI ASSISTANT SETTINGS
 # =================================================
-
 st.sidebar.subheader(
     "AI Economics Assistant"
     if lang == "English"
@@ -42,20 +42,25 @@ pages = {
     get_text("demand_supply", lang): demand_supply,
     get_text("elasticity", lang): elasticity,
     get_text("quiz", lang): quiz,
-    get_text("competition", lang): competition,  # Competition améliorée avec chatbot intégré
+    get_text("competition", lang): competition,
     get_text("teacher_panel", lang): teacher_panel,
-    get_text("chatbot", lang): chatbot  # Chatbot autonome
+    get_text("chatbot", lang): chatbot
 }
 
-page_choice = st.sidebar.radio(get_text("navigation", lang), list(pages.keys()))
+page_choice = st.sidebar.radio(
+    get_text("navigation", lang),
+    list(pages.keys())
+)
 
 # =================================================
 # RUN SELECTED MODULE
 # =================================================
 pages[page_choice].run(lang)
+
 # =================================================
-# FULL AI ECONOMICS ASSISTANT
+# GLOBAL AI ECONOMICS ASSISTANT
 # =================================================
+st.markdown("---")
 
 st.header(
     "AI Economics Assistant"
@@ -63,103 +68,136 @@ st.header(
     else "المساعد الاقتصادي الذكي"
 )
 
-st.write(
-    "Ask the AI to analyze equilibrium, elasticity, revenue, or market conditions."
-    if lang == "English"
-    else "اطلب من الذكاء الاصطناعي تحليل التوازن أو المرونة أو الإيرادات أو حالة السوق."
-)
-
 student_question = st.text_area(
-    "Your question:"
+    "Ask about elasticity, equilibrium, demand, supply, revenue, GDP, inflation..."
     if lang == "English"
-    else "سؤالك:"
+    else "اسأل عن المرونة أو التوازن أو الطلب أو العرض أو الناتج المحلي..."
 )
 
 if st.button(
-    "Analyze Economic Situation"
+    "Analyze"
     if lang == "English"
-    else "تحليل الوضع الاقتصادي"
+    else "تحليل"
 ):
 
-    if not ai_enabled:
-
+    if student_question.strip() == "":
         st.warning(
-            "Please enter OpenAI API key in sidebar"
+            "Please enter a question"
             if lang == "English"
-            else "يرجى إدخال مفتاح OpenAI"
+            else "يرجى إدخال سؤال"
         )
 
     else:
 
-        # FULL ECONOMIC CONTEXT FROM SIMULATION
-       # ===============================
-# AI ECONOMICS ASSISTANT
-# ===============================
+        # =====================================
+        # GET ECONOMIC VARIABLES SAFELY
+        # =====================================
 
-st.markdown("---")
-st.header("AI Economics Assistant")
-
-user_question = st.text_area(
-    "Ask any question about elasticity, microeconomics, macroeconomics, or your results:"
-)
-
-if st.button("Ask AI Assistant"):
-
-    if user_question.strip() == "":
-        st.warning("Please enter a question.")
-    else:
-
-        # Safely retrieve variables if they exist
         a_val = globals().get("a", None)
         b_val = globals().get("b", None)
         P_val = globals().get("P", None)
         Q_val = globals().get("Q", None)
         elasticity_val = globals().get("elasticity", None)
 
-        # Build economic context safely
         context = f"""
-        Student economic model:
+        Economic simulation data:
 
-        Demand intercept (a): {a_val if a_val is not None else "Not defined"}
-        Demand slope (b): {b_val if b_val is not None else "Not defined"}
-        Price (P): {P_val if P_val is not None else "Not defined"}
-        Quantity (Q): {Q_val if Q_val is not None else "Not defined"}
-        Elasticity: {elasticity_val if elasticity_val is not None else "Not defined"}
+        Demand intercept (a): {a_val}
+        Demand slope (b): {b_val}
+        Price: {P_val}
+        Quantity: {Q_val}
+        Elasticity: {elasticity_val}
 
         Student question:
-        {user_question}
+        {student_question}
         """
 
-        # Simple built-in AI logic (no OpenAI dependency)
-        if "elasticity" in user_question.lower():
-            response = """
+        # =====================================
+        # USE OPENAI IF AVAILABLE
+        # =====================================
+
+        if ai_enabled:
+
+            try:
+
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """
+You are an expert economics professor.
+Explain clearly using microeconomics and macroeconomics theory.
+Use elasticity, equilibrium, revenue, GDP, inflation when relevant.
+"""
+                        },
+                        {
+                            "role": "user",
+                            "content": context
+                        }
+                    ],
+                    temperature=0.3
+                )
+
+                answer = response.choices[0].message.content
+
+                st.success(answer)
+
+            except Exception as e:
+
+                st.error(f"AI Error: {e}")
+
+        # =====================================
+        # OFFLINE FALLBACK AI
+        # =====================================
+
+        else:
+
+            question_lower = student_question.lower()
+
+            if "elasticity" in question_lower:
+
+                st.success("""
 Elasticity measures responsiveness of quantity demanded to price changes.
 
-If elasticity > 1 → Elastic demand  
-If elasticity = 1 → Unit elastic  
-If elasticity < 1 → Inelastic demand  
+Elastic (>1): very sensitive  
+Inelastic (<1): not sensitive  
+Unit (=1): proportional change
+""")
 
-Elastic demand means consumers are sensitive to price changes.
-"""
-        elif "demand" in user_question.lower():
-            response = """
-Demand shows the relationship between price and quantity demanded.
+            elif "equilibrium" in question_lower:
 
-Law of demand: when price increases, quantity demanded decreases.
-"""
-        elif "supply" in user_question.lower():
-            response = """
-Supply shows the relationship between price and quantity supplied.
+                st.success("""
+Equilibrium occurs where demand equals supply.
 
-Law of supply: when price increases, quantity supplied increases.
-"""
-        else:
-            response = f"""
-Your question: "{user_question}"
+At equilibrium:
+• No shortage
+• No surplus
+• Market is stable
+""")
 
-Economic interpretation:
-This relates to decision-making, optimization, and market behavior.
-Consider analyzing elasticity, marginal effects, and equilibrium.
-"""
+            elif "demand" in question_lower:
 
-        st.success(response)
+                st.success("""
+Law of demand:
+When price increases, quantity demanded decreases.
+""")
+
+            elif "supply" in question_lower:
+
+                st.success("""
+Law of supply:
+When price increases, quantity supplied increases.
+""")
+
+            else:
+
+                st.success("""
+This question relates to economic analysis.
+
+Consider:
+• elasticity
+• equilibrium
+• marginal analysis
+• market structure
+""")
