@@ -268,11 +268,3 @@ Revenue is maximized at this point.
 
 """)
 
-
-        else:
-
-            st.info(
-
-                "Run Elasticity or Demand-Supply module first."
-                if lang == "English"
-                else "قم بتشغيل وحدة المرونة أو العرض والطلب أولا
