@@ -1,32 +1,40 @@
 import streamlit as st
+from modules import supply_demand, elasticity, production_cost, quiz
 
-from modules import supply_demand
-from modules import elasticity
-from modules import production_cost
-from modules import quiz
+st.set_page_config(page_title="منصة الاقتصاد الجزئي", layout="wide")
 
-st.set_page_config(page_title="Microeconomics Platform")
+# RTL support
+st.markdown("""
+    <style>
+    body {
+        direction: RTL;
+        text-align: right;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-st.title("Microeconomics Interactive Platform")
+st.title("📘 منصة مبادئ الاقتصاد الجزئي التفاعلية")
 
-menu = st.sidebar.selectbox(
-    "Choose chapter",
+st.sidebar.title("القائمة الرئيسية")
+
+menu = st.sidebar.radio(
+    "اختر الفصل",
     [
-        "Supply and Demand",
-        "Elasticity",
-        "Production and Cost",
-        "Quiz"
+        "العرض والطلب",
+        "المرونة",
+        "دالة الإنتاج والتكاليف",
+        "اختبار تفاعلي"
     ]
 )
 
-if menu == "Supply and Demand":
+if menu == "العرض والطلب":
     supply_demand.run()
 
-elif menu == "Elasticity":
+elif menu == "المرونة":
     elasticity.run()
 
-elif menu == "Production and Cost":
+elif menu == "دالة الإنتاج والتكاليف":
     production_cost.run()
 
-elif menu == "Quiz":
+elif menu == "اختبار تفاعلي":
     quiz.run()
