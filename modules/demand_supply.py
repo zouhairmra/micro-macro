@@ -1,258 +1,120 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
-
+from utils import calculate_equilibrium
 
 def run(lang="English"):
+    # -----------------------------
+    # Page Header
+    # -----------------------------
+    st.header("Demand & Supply" if lang=="English" else "العرض والطلب")
 
-    # =========================
-    # LANGUAGE TEXT
-    # =========================
-
-    if lang == "English":
-
-        TITLE = "Demand and Supply Interactive Simulator"
-        SCENARIO_LABEL = "Select economic shock"
-        EXPLANATION_TITLE = "Economic explanation"
-        RESULT_TITLE = "Market result"
-        EQUILIBRIUM_TITLE = "Equilibrium"
-
-        SCENARIOS = {
-
-            "No shock": {
-                "demand": 0,
-                "supply": 0,
-                "explanation": "Market is in initial equilibrium"
-            },
-
-            "Demand increase (income rise)": {
-                "demand": 4,
-                "supply": 0,
-                "explanation": "Higher income increases demand → Demand shifts RIGHT"
-            },
-
-            "Demand decrease (pandemic)": {
-                "demand": -5,
-                "supply": 0,
-                "explanation": "Pandemic reduces consumption → Demand shifts LEFT"
-            },
-
-            "Supply increase (technology)": {
-                "demand": 0,
-                "supply": 4,
-                "explanation": "Technology reduces cost → Supply shifts RIGHT (DOWN)"
-            },
-
-            "Supply decrease (war)": {
-                "demand": 0,
-                "supply": -4,
-                "explanation": "War increases cost → Supply shifts LEFT (UP)"
-            },
-
-            "Supply increase (subsidy)": {
-                "demand": 0,
-                "supply": 3,
-                "explanation": "Subsidy reduces cost → Supply shifts RIGHT"
-            },
-
-            "Supply decrease (tax)": {
-                "demand": 0,
-                "supply": -3,
-                "explanation": "Tax increases cost → Supply shifts LEFT"
-            }
-
-        }
-
-        PRICE_UP = "Price increases"
-        PRICE_DOWN = "Price decreases"
-
-        Q_UP = "Quantity increases"
-        Q_DOWN = "Quantity decreases"
-
-
-    else:
-
-        TITLE = "محاكي العرض والطلب التفاعلي"
-        SCENARIO_LABEL = "اختر الصدمة الاقتصادية"
-        EXPLANATION_TITLE = "التفسير الاقتصادي"
-        RESULT_TITLE = "نتيجة السوق"
-        EQUILIBRIUM_TITLE = "التوازن"
-
-        SCENARIOS = {
-
-            "لا توجد صدمة": {
-                "demand": 0,
-                "supply": 0,
-                "explanation": "السوق في حالة توازن أولي"
-            },
-
-            "زيادة الطلب (ارتفاع الدخل)": {
-                "demand": 4,
-                "supply": 0,
-                "explanation": "ارتفاع الدخل يزيد الطلب → انتقال منحنى الطلب إلى اليمين"
-            },
-
-            "انخفاض الطلب (جائحة)": {
-                "demand": -5,
-                "supply": 0,
-                "explanation": "الجائحة تقلل الاستهلاك → انتقال منحنى الطلب إلى اليسار"
-            },
-
-            "زيادة العرض (تكنولوجيا)": {
-                "demand": 0,
-                "supply": 4,
-                "explanation": "التكنولوجيا تقلل التكلفة → انتقال منحنى العرض إلى اليمين (إلى الأسفل)"
-            },
-
-            "انخفاض العرض (حرب)": {
-                "demand": 0,
-                "supply": -4,
-                "explanation": "الحرب تزيد التكلفة → انتقال منحنى العرض إلى اليسار (إلى الأعلى)"
-            },
-
-            "زيادة العرض (دعم حكومي)": {
-                "demand": 0,
-                "supply": 3,
-                "explanation": "الدعم يقلل التكلفة → انتقال منحنى العرض إلى اليمين"
-            },
-
-            "انخفاض العرض (ضريبة)": {
-                "demand": 0,
-                "supply": -3,
-                "explanation": "الضريبة تزيد التكلفة → انتقال منحنى العرض إلى اليسار"
-            }
-
-        }
-
-        PRICE_UP = "السعر يرتفع"
-        PRICE_DOWN = "السعر ينخفض"
-
-        Q_UP = "الكمية ترتفع"
-        Q_DOWN = "الكمية تنخفض"
-
-    # =========================
-    # UI
-    # =========================
-
-    st.title(TITLE)
-
-    scenario_name = st.selectbox(
-        SCENARIO_LABEL,
-        list(SCENARIOS.keys())
+    st.write(
+        "Adjust the sliders to simulate demand and supply curves." 
+        if lang=="English" 
+        else "غيّر القيم في الشرائح لمحاكاة منحنيات العرض والطلب."
     )
 
-    demand_shift = SCENARIOS[scenario_name]["demand"]
-    supply_shift = SCENARIOS[scenario_name]["supply"]
+    # -----------------------------
+    # Sliders for Parameters
+    # -----------------------------
+    col1, col2 = st.columns(2)
 
-    explanation = SCENARIOS[scenario_name]["explanation"]
+    with col1:
+        a = st.slider("Demand Intercept (a)", 50, 200, 120)
+        b = st.slider("Demand Slope (b)", 1, 10, 3)
 
-    # =========================
-    # BASE CURVES
-    # =========================
+    with col2:
+        c = st.slider("Supply Intercept (c)", 0, 100, 20)
+        d = st.slider("Supply Slope (d)", 1, 10, 2)
 
-    P = np.linspace(0, 20, 200)
-
-    a = 16
-    b = 0.6
-    c = 2
-    d = 0.5
-
-    Qd = a - b * P
-    Qs = c + d * P
-
-    Qd_new = (a + demand_shift) - b * P
-    Qs_new = (c + supply_shift) + d * P
-
-    # =========================
-    # EQUILIBRIUM FUNCTION
-    # =========================
-
-    def equilibrium(a, b, c, d):
-
-        Pe = (a - c) / (b + d)
-        Qe = a - b * Pe
-
-        return Pe, Qe
-
-    Pe, Qe = equilibrium(a, b, c, d)
-
-    Pe_new, Qe_new = equilibrium(
-        a + demand_shift,
-        b,
-        c + supply_shift,
-        d
+    # -----------------------------
+    # Calculate Equilibrium
+    # -----------------------------
+    eq_price, eq_quantity = calculate_equilibrium(a, b, c, d)
+    st.success(
+        f"Equilibrium Price = {eq_price:.2f} | Quantity = {eq_quantity:.2f}"
+        if lang=="English" 
+        else f"سعر التوازن = {eq_price:.2f} | الكمية = {eq_quantity:.2f}"
     )
 
-    # =========================
-    # GRAPH
-    # =========================
+    # -----------------------------
+    # Generate Demand & Supply Data
+    # -----------------------------
+    prices = np.linspace(0, eq_price*2, 50)
+    demand = a - b*prices
+    supply = c + d*prices
 
+    df = pd.DataFrame({
+        "Price": prices,
+        "Demand": demand,
+        "Supply": supply
+    })
+
+    # -----------------------------
+    # Plot Interactive Graph
+    # -----------------------------
     fig = go.Figure()
-
-    fig.add_trace(go.Scatter(x=Qd, y=P, name="Demand"))
-    fig.add_trace(go.Scatter(x=Qs, y=P, name="Supply"))
-
-    if demand_shift != 0:
-        fig.add_trace(go.Scatter(
-            x=Qd_new, y=P,
-            name="New Demand",
-            line=dict(dash="dash")
-        ))
-
-    if supply_shift != 0:
-        fig.add_trace(go.Scatter(
-            x=Qs_new, y=P,
-            name="New Supply",
-            line=dict(dash="dash")
-        ))
+    fig.add_trace(go.Scatter(x=df["Quantity"], y=df["Price"], mode='lines', name="Supply"))
+    fig.add_trace(go.Scatter(x=df["Quantity"], y=df["Price"], mode='lines', name="Demand"))
 
     fig.add_trace(go.Scatter(
-        x=[Qe], y=[Pe],
-        mode="markers",
-        name="Original Equilibrium"
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=[Qe_new], y=[Pe_new],
-        mode="markers",
-        name="New Equilibrium"
+        x=[eq_quantity], y=[eq_price],
+        mode='markers+text',
+        name="Equilibrium",
+        marker=dict(color='red', size=12),
+        text=["Equilibrium"],
+        textposition="top right"
     ))
 
     fig.update_layout(
-        xaxis_title="Quantity",
-        yaxis_title="Price"
+        title="Demand & Supply Curve" if lang=="English" else "منحنيات العرض والطلب",
+        xaxis_title="Quantity" if lang=="English" else "الكمية",
+        yaxis_title="Price" if lang=="English" else "السعر",
+        legend_title="Legend" if lang=="English" else "المفتاح",
+        width=800, height=500
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig)
 
-    # =========================
-    # EQUILIBRIUM DISPLAY
-    # =========================
+    # -----------------------------
+    # Optional Scenario Simulation
+    # -----------------------------
+    st.subheader("Scenario Simulation" if lang=="English" else "محاكاة سيناريو")
+    st.write(
+        "Adjust supply or demand and see how equilibrium changes."
+        if lang=="English" else
+        "غيّر العرض أو الطلب وشاهد كيف يتغير التوازن."
+    )
 
-    st.subheader(EQUILIBRIUM_TITLE)
+    shift_type = st.radio(
+        "Shift Type" if lang=="English" else "نوع التغير",
+        ["Increase Demand", "Decrease Demand", "Increase Supply", "Decrease Supply"]
+        if lang=="English" else
+        ["زيادة الطلب", "انخفاض الطلب", "زيادة العرض", "انخفاض العرض"]
+    )
 
-    col1, col2 = st.columns(2)
+    shift_value = st.slider(
+        "Shift magnitude", 0, 50, 10
+        if lang=="English" else
+        "مقدار التغير", 0, 50, 10
+    )
 
-    col1.metric("Original Price", round(Pe, 2))
-    col1.metric("Original Quantity", round(Qe, 2))
+    # Apply shift
+    new_a, new_c = a, c
+    if shift_type in ["Increase Demand", "زيادة الطلب"]:
+        new_a += shift_value
+    elif shift_type in ["Decrease Demand", "انخفاض الطلب"]:
+        new_a -= shift_value
+    elif shift_type in ["Increase Supply", "زيادة العرض"]:
+        new_c += shift_value
+    elif shift_type in ["Decrease Supply", "انخفاض العرض"]:
+        new_c -= shift_value
 
-    col2.metric("New Price", round(Pe_new, 2))
-    col2.metric("New Quantity", round(Qe_new, 2))
-
-    # =========================
-    # EXPLANATION
-    # =========================
-
-    st.subheader(EXPLANATION_TITLE)
-    st.info(explanation)
-
-    # =========================
-    # RESULT
-    # =========================
-
-    st.subheader(RESULT_TITLE)
-
-    price_result = PRICE_UP if Pe_new > Pe else PRICE_DOWN
-    quantity_result = Q_UP if Qe_new > Qe else Q_DOWN
-
-    st.success(f"{price_result} ، {quantity_result}")
+    new_eq_price, new_eq_quantity = calculate_equilibrium(new_a, b, new_c, d)
+    st.info(
+        f"New Equilibrium Price = {new_eq_price:.2f} | Quantity = {new_eq_quantity:.2f}"
+        if lang=="English" else
+        f"سعر التوازن الجديد = {new_eq_price:.2f} | الكمية = {new_eq_quantity:.2f}"
+    )
