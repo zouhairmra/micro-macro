@@ -2,17 +2,14 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from utils import calculate_equilibrium
+from utils import calculate_equilibrium  # Make sure this exists
 
 def run(lang="English"):
-    # -----------------------------
-    # Page Header
-    # -----------------------------
     st.header("Demand & Supply" if lang=="English" else "العرض والطلب")
 
     st.write(
-        "Adjust the sliders to simulate demand and supply curves." 
-        if lang=="English" 
+        "Adjust the sliders to simulate demand and supply curves."
+        if lang=="English"
         else "غيّر القيم في الشرائح لمحاكاة منحنيات العرض والطلب."
     )
 
@@ -35,7 +32,7 @@ def run(lang="English"):
     eq_price, eq_quantity = calculate_equilibrium(a, b, c, d)
     st.success(
         f"Equilibrium Price = {eq_price:.2f} | Quantity = {eq_quantity:.2f}"
-        if lang=="English" 
+        if lang=="English"
         else f"سعر التوازن = {eq_price:.2f} | الكمية = {eq_quantity:.2f}"
     )
 
@@ -43,28 +40,23 @@ def run(lang="English"):
     # Generate Demand & Supply Data
     # -----------------------------
     prices = np.linspace(0, eq_price*2, 50)
-    demand = a - b*prices
-    supply = c + d*prices
-
-    df = pd.DataFrame({
-        "Price": prices,
-        "Demand": demand,
-        "Supply": supply
-    })
+    demand_quantities = a - b * prices
+    supply_quantities = c + d * prices
 
     # -----------------------------
     # Plot Interactive Graph
     # -----------------------------
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["Quantity"], y=df["Price"], mode='lines', name="Supply"))
-    fig.add_trace(go.Scatter(x=df["Quantity"], y=df["Price"], mode='lines', name="Demand"))
+    fig.add_trace(go.Scatter(x=demand_quantities, y=prices, mode='lines', name="Demand" if lang=="English" else "الطلب"))
+    fig.add_trace(go.Scatter(x=supply_quantities, y=prices, mode='lines', name="Supply" if lang=="English" else "العرض"))
 
+    # Equilibrium point
     fig.add_trace(go.Scatter(
         x=[eq_quantity], y=[eq_price],
         mode='markers+text',
-        name="Equilibrium",
+        name="Equilibrium" if lang=="English" else "التوازن",
         marker=dict(color='red', size=12),
-        text=["Equilibrium"],
+        text=["Equilibrium"] if lang=="English" else ["التوازن"],
         textposition="top right"
     ))
 
@@ -79,7 +71,7 @@ def run(lang="English"):
     st.plotly_chart(fig)
 
     # -----------------------------
-    # Optional Scenario Simulation
+    # Scenario Simulation
     # -----------------------------
     st.subheader("Scenario Simulation" if lang=="English" else "محاكاة سيناريو")
     st.write(
@@ -96,9 +88,8 @@ def run(lang="English"):
     )
 
     shift_value = st.slider(
-        "Shift magnitude", 0, 50, 10
-        if lang=="English" else
-        "مقدار التغير", 0, 50, 10
+        "Shift magnitude" if lang=="English" else "مقدار التغير",
+        0, 50, 10
     )
 
     # Apply shift
@@ -112,9 +103,10 @@ def run(lang="English"):
     elif shift_type in ["Decrease Supply", "انخفاض العرض"]:
         new_c -= shift_value
 
+    # New equilibrium
     new_eq_price, new_eq_quantity = calculate_equilibrium(new_a, b, new_c, d)
     st.info(
         f"New Equilibrium Price = {new_eq_price:.2f} | Quantity = {new_eq_quantity:.2f}"
-        if lang=="English" else
-        f"سعر التوازن الجديد = {new_eq_price:.2f} | الكمية = {new_eq_quantity:.2f}"
+        if lang=="English"
+        else f"سعر التوازن الجديد = {new_eq_price:.2f} | الكمية = {new_eq_quantity:.2f}"
     )
