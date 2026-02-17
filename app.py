@@ -1,29 +1,32 @@
 import streamlit as st
-from config import get_text
-from modules import demand_supply, elasticity, competition
 
-# =================================================
-# PAGE CONFIG
-# =================================================
-st.set_page_config(page_title="Economics Platform", layout="wide")
+from modules import supply_demand
+from modules import elasticity
+from modules import production_cost
+from modules import quiz
 
-# =================================================
-# LANGUAGE SELECTION
-# =================================================
-lang = st.sidebar.selectbox("Language", ["English", "العربية"])
+st.set_page_config(page_title="Microeconomics Platform")
 
-# =================================================
-# PAGE NAVIGATION
-# =================================================
-pages = {
-    get_text("demand_supply", lang): demand_supply,
-    get_text("elasticity", lang): elasticity,
-    get_text("competition", lang): competition,
-    }
+st.title("Microeconomics Interactive Platform")
 
-page_choice = st.sidebar.radio(get_text("navigation", lang), list(pages.keys()))
+menu = st.sidebar.selectbox(
+    "Choose chapter",
+    [
+        "Supply and Demand",
+        "Elasticity",
+        "Production and Cost",
+        "Quiz"
+    ]
+)
 
-# =================================================
-# RUN SELECTED MODULE
-# =================================================
-pages[page_choice].run(lang)
+if menu == "Supply and Demand":
+    supply_demand.run()
+
+elif menu == "Elasticity":
+    elasticity.run()
+
+elif menu == "Production and Cost":
+    production_cost.run()
+
+elif menu == "Quiz":
+    quiz.run()
